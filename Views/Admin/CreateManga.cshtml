@@ -1,0 +1,46 @@
+@model AnyComic.Models.Manga
+
+@{
+    ViewData["Title"] = "Adicionar Mangá - Admin";
+}
+
+<div class="container">
+    <h1 class="mb-4">Adicionar Novo Mangá</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <form method="post" asp-controller="Admin" asp-action="CreateManga" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="mb-3">
+                            <label asp-for="Titulo" class="form-label">Título</label>
+                            <input asp-for="Titulo" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Autor" class="form-label">Autor</label>
+                            <input asp-for="Autor" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descricao" class="form-label">Descrição</label>
+                            <textarea asp-for="Descricao" class="form-control" rows="5" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imagemCapa" class="form-label">Imagem de Capa</label>
+                            <input type="file" class="form-control" id="imagemCapa" name="imagemCapa" accept="image/*">
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">Salvar</button>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

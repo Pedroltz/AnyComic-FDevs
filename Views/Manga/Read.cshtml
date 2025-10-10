@@ -1,0 +1,57 @@
+@model AnyComic.Models.PaginaManga
+
+@{
+    ViewData["Title"] = $"{ViewBag.MangaTitulo} - Página {ViewBag.PaginaAtual}";
+}
+
+<div class="container-fluid bg-dark min-vh-100 d-flex flex-column">
+    <div class="row bg-black text-white py-2">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <a asp-controller="Manga" asp-action="Details" asp-route-id="@ViewBag.MangaId" class="btn btn-sm btn-outline-light">
+                    Voltar
+                </a>
+                <h5 class="mb-0">@ViewBag.MangaTitulo - Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</h5>
+                <div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row flex-grow-1">
+        <div class="col text-center d-flex align-items-center justify-content-center">
+            <img src="@Model.CaminhoImagem" class="img-fluid" alt="Página @Model.NumeroPagina" style="max-height: 90vh;">
+        </div>
+    </div>
+
+    <div class="row bg-black text-white py-3">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                @if (ViewBag.PaginaAtual > 1)
+                {
+                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual - 1)"
+                       class="btn btn-primary">
+                        Página Anterior
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-secondary" disabled>Página Anterior</button>
+                }
+
+                <span>Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</span>
+
+                @if (ViewBag.PaginaAtual < ViewBag.TotalPaginas)
+                {
+                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual + 1)"
+                       class="btn btn-primary">
+                        Próxima Página
+                    </a>
+                }
+                else
+                {
+                    <button class="btn btn-secondary" disabled>Próxima Página</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

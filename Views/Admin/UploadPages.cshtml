@@ -1,0 +1,56 @@
+@model AnyComic.Models.Manga
+
+@{
+    ViewData["Title"] = $"Upload de Páginas - {Model.Titulo}";
+}
+
+<div class="container">
+    <h1 class="mb-4">Upload de Páginas - @Model.Titulo</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Upload de Novas Páginas</h5>
+                    <form method="post" asp-controller="Admin" asp-action="UploadPages" asp-route-id="@Model.Id" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label for="paginas" class="form-label">Selecione as páginas (múltiplos arquivos)</label>
+                            <input type="file" class="form-control" id="paginas" name="paginas" accept="image/*" multiple required>
+                            <div class="form-text">Selecione múltiplos arquivos de imagem.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Voltar</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Páginas Existentes (@Model.Paginas.Count)</h5>
+                    @if (Model.Paginas.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var pagina in Model.Paginas.OrderBy(p => p.NumeroPagina))
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>Página @pagina.NumeroPagina</span>
+                                    <form method="post" asp-controller="Admin" asp-action="DeletePage" asp-route-id="@pagina.Id" asp-route-mangaId="@Model.Id" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir esta página?')">Excluir</button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Nenhuma página foi adicionada ainda.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

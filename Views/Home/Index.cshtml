@@ -1,0 +1,50 @@
+﻿@model IEnumerable<AnyComic.Models.Manga>
+
+@{
+    ViewData["Title"] = "Home - AnyComic";
+}
+
+<div class="container">
+    <div class="text-center mb-5">
+        <h1 class="display-4">Bem-vindo ao AnyComic</h1>
+        <p class="lead">Seu portal de mangás online</p>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var manga in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm manga-card">
+                        @if (!string.IsNullOrEmpty(manga.ImagemCapa))
+                        {
+                            <img src="@manga.ImagemCapa" class="card-img-top manga-cover" alt="@manga.Titulo">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 350px;">
+                                <span class="text-white">Sem capa</span>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@manga.Titulo</h5>
+                            <p class="card-text text-muted"><small>Por @manga.Autor</small></p>
+                            <p class="card-text">@(manga.Descricao.Length > 100 ? manga.Descricao.Substring(0, 100) + "..." : manga.Descricao)</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" class="btn btn-primary w-100">Ver Detalhes</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center" role="alert">
+            <h4>Nenhum mangá disponível no momento</h4>
+            <p>Volte em breve para conferir novos mangás!</p>
+        </div>
+    }
+</div>

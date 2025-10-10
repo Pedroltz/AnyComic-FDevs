@@ -1,0 +1,54 @@
+@model IEnumerable<AnyComic.Models.Favorito>
+
+@{
+    ViewData["Title"] = "Meus Favoritos - AnyComic";
+}
+
+<div class="container">
+    <h1 class="display-5 mb-4">Meus Favoritos</h1>
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach (var favorito in Model)
+            {
+                <div class="col">
+                    <div class="card h-100 shadow-sm manga-card">
+                        @if (!string.IsNullOrEmpty(favorito.Manga?.ImagemCapa))
+                        {
+                            <img src="@favorito.Manga.ImagemCapa" class="card-img-top manga-cover" alt="@favorito.Manga.Titulo">
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 350px;">
+                                <span class="text-white">Sem capa</span>
+                            </div>
+                        }
+                        <div class="card-body">
+                            <h5 class="card-title">@favorito.Manga?.Titulo</h5>
+                            <p class="card-text text-muted"><small>Por @favorito.Manga?.Autor</small></p>
+                            <p class="card-text"><small class="text-muted">Adicionado em @favorito.DataAdicao.ToString("dd/MM/yyyy")</small></p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-controller="Manga" asp-action="Details" asp-route-id="@favorito.MangaId" class="btn btn-primary w-100 mb-2">
+                                Ver Detalhes
+                            </a>
+                            <form method="post" asp-controller="Manga" asp-action="RemoveFavorito" asp-route-id="@favorito.MangaId" asp-route-returnUrl="favoritos">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-danger w-100">Remover</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info text-center" role="alert">
+            <h4>Você ainda não tem mangás favoritos</h4>
+            <p>Explore nosso catálogo e adicione seus mangás favoritos!</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-3">Ver Catálogo</a>
+        </div>
+    }
+</div>

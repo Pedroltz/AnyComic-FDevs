@@ -1,0 +1,68 @@
+@model AnyComic.Models.Manga
+
+@{
+    ViewData["Title"] = $"Excluir {Model.Titulo}";
+}
+
+<div class="container">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-8">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Confirmar Exclusão</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        <strong>Atenção!</strong> Esta ação não pode ser desfeita. Todos os dados serão permanentemente excluídos.
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            @if (!string.IsNullOrEmpty(Model.ImagemCapa))
+                            {
+                                <img src="@Model.ImagemCapa" class="img-fluid rounded" alt="@Model.Titulo">
+                            }
+                            else
+                            {
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 200px;">
+                                    <span>Sem capa</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-8">
+                            <h4>@Model.Titulo</h4>
+                            <p><strong>Autor:</strong> @Model.Autor</p>
+                            <p><strong>Descrição:</strong> @Model.Descricao</p>
+                            <p><strong>Páginas:</strong> @Model.Paginas.Count</p>
+                            <p><strong>Data de Criação:</strong> @Model.DataCriacao.ToString("dd/MM/yyyy")</p>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="alert alert-info" role="alert">
+                        <h5 class="alert-heading">O que será excluído:</h5>
+                        <ul class="mb-0">
+                            <li>Informações do mangá</li>
+                            <li>Imagem de capa</li>
+                            <li>Todas as @Model.Paginas.Count página(s) do mangá</li>
+                            <li>Todos os favoritos relacionados</li>
+                        </ul>
+                    </div>
+
+                    <form method="post" asp-action="DeleteManga" asp-route-id="@Model.Id">
+                        @Html.AntiForgeryToken()
+                        <div class="d-flex justify-content-between gap-2">
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-lg" onclick="return confirm('Tem certeza absoluta que deseja excluir este mangá?')">
+                                Sim, Excluir Permanentemente
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

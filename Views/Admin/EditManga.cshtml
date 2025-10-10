@@ -1,0 +1,81 @@
+@model AnyComic.Models.Manga
+
+@{
+    ViewData["Title"] = $"Editar {Model.Titulo}";
+}
+
+<div class="container">
+    <h1 class="mb-4">Editar Mangá</h1>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <form method="post" asp-controller="Admin" asp-action="EditManga" asp-route-id="@Model.Id" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Id" />
+                        <input type="hidden" asp-for="DataCriacao" />
+
+                        <div class="mb-3">
+                            <label asp-for="Titulo" class="form-label">Título</label>
+                            <input asp-for="Titulo" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Autor" class="form-label">Autor</label>
+                            <input asp-for="Autor" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Descricao" class="form-label">Descrição</label>
+                            <textarea asp-for="Descricao" class="form-control" rows="5" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Imagem de Capa Atual</label>
+                            @if (!string.IsNullOrEmpty(Model.ImagemCapa))
+                            {
+                                <div class="mb-2">
+                                    <img src="@Model.ImagemCapa" alt="@Model.Titulo" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                            }
+                            else
+                            {
+                                <p class="text-muted">Nenhuma capa definida</p>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imagemCapa" class="form-label">Nova Imagem de Capa (opcional)</label>
+                            <input type="file" class="form-control" id="imagemCapa" name="imagemCapa" accept="image/*">
+                            <div class="form-text">Deixe em branco para manter a capa atual.</div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Informações</h5>
+                    <p><strong>Data de Criação:</strong><br>@Model.DataCriacao.ToString("dd/MM/yyyy HH:mm")</p>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Admin" asp-action="UploadPages" asp-route-id="@Model.Id" class="btn btn-info">
+                            Gerenciar Páginas
+                        </a>
+                        <a asp-controller="Admin" asp-action="DeleteManga" asp-route-id="@Model.Id" class="btn btn-danger">
+                            Excluir Mangá
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
