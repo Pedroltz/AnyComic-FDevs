@@ -7,6 +7,24 @@
 <div class="container">
     <h1 class="mb-4">Editar Mangá</h1>
 
+    @if (ViewBag.Success != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @ViewBag.Success
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @ViewBag.Error
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
     <div class="row">
         <div class="col-md-8">
             <div class="card shadow">
@@ -15,6 +33,7 @@
                         @Html.AntiForgeryToken()
                         <input type="hidden" asp-for="Id" />
                         <input type="hidden" asp-for="DataCriacao" />
+                        <input type="hidden" asp-for="ImagemCapa" />
 
                         <div class="mb-3">
                             <label asp-for="Titulo" class="form-label">Título</label>

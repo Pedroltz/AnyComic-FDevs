@@ -63,7 +63,15 @@ namespace AnyComic.Controllers
                 if (imagemCapa != null && imagemCapa.Length > 0)
                 {
                     var fileName = $"{Guid.NewGuid()}_{imagemCapa.FileName}";
-                    var filePath = Path.Combine(_environment.WebRootPath, "uploads", "capas", fileName);
+                    var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads", "capas");
+
+                    // Criar diretório se não existir
+                    if (!Directory.Exists(uploadsDir))
+                    {
+                        Directory.CreateDirectory(uploadsDir);
+                    }
+
+                    var filePath = Path.Combine(uploadsDir, fileName);
 
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
@@ -108,7 +116,7 @@ namespace AnyComic.Controllers
         // POST: Admin/EditManga/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditManga(int id, Manga manga, IFormFile? imagemCapa)
+        public async Task<IActionResult> EditManga(int id, [Bind("Id,Titulo,Autor,Descricao,ImagemCapa,DataCriacao")] Manga manga, IFormFile? imagemCapa)
         {
             if (!IsAdmin())
             {
@@ -124,14 +132,13 @@ namespace AnyComic.Controllers
             {
                 try
                 {
-                    var mangaExistente = await _context.Mangas.AsNoTracking().FirstOrDefaultAsync(m => m.Id == id);
-
+                    // Se uma nova imagem foi enviada, processa o upload
                     if (imagemCapa != null && imagemCapa.Length > 0)
                     {
                         // Deletar imagem antiga se existir
-                        if (!string.IsNullOrEmpty(mangaExistente?.ImagemCapa))
+                        if (!string.IsNullOrEmpty(manga.ImagemCapa))
                         {
-                            var oldImagePath = Path.Combine(_environment.WebRootPath, mangaExistente.ImagemCapa.TrimStart('/'));
+                            var oldImagePath = Path.Combine(_environment.WebRootPath, manga.ImagemCapa.TrimStart('/'));
                             if (System.IO.File.Exists(oldImagePath))
                             {
                                 System.IO.File.Delete(oldImagePath);
@@ -139,7 +146,15 @@ namespace AnyComic.Controllers
                         }
 
                         var fileName = $"{Guid.NewGuid()}_{imagemCapa.FileName}";
-                        var filePath = Path.Combine(_environment.WebRootPath, "uploads", "capas", fileName);
+                        var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads", "capas");
+
+                        // Criar diretório se não existir
+                        if (!Directory.Exists(uploadsDir))
+                        {
+                            Directory.CreateDirectory(uploadsDir);
+                        }
+
+                        var filePath = Path.Combine(uploadsDir, fileName);
 
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {
@@ -148,10 +163,7 @@ namespace AnyComic.Controllers
 
                         manga.ImagemCapa = $"/uploads/capas/{fileName}";
                     }
-                    else
-                    {
-                        manga.ImagemCapa = mangaExistente?.ImagemCapa ?? string.Empty;
-                    }
+                    // Se não houver nova imagem, manga.ImagemCapa já contém o valor correto do campo hidden
 
                     _context.Update(manga);
                     await _context.SaveChangesAsync();
@@ -278,12 +290,20 @@ namespace AnyComic.Controllers
             {
                 var ultimaPagina = manga.Paginas.Any() ? manga.Paginas.Max(p => p.NumeroPagina) : 0;
 
+                var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads", "paginas");
+
+                // Criar diretório se não existir
+                if (!Directory.Exists(uploadsDir))
+                {
+                    Directory.CreateDirectory(uploadsDir);
+                }
+
                 foreach (var pagina in paginas)
                 {
                     if (pagina.Length > 0)
                     {
                         var fileName = $"{Guid.NewGuid()}_{pagina.FileName}";
-                        var filePath = Path.Combine(_environment.WebRootPath, "uploads", "paginas", fileName);
+                        var filePath = Path.Combine(uploadsDir, fileName);
 
                         using (var stream = new FileStream(filePath, FileMode.Create))
                         {

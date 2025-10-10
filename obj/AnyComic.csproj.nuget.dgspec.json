@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\pedro.tunin\\Documents\\ASPNET\\AnyComic\\AnyComic.csproj": {}
+    "/home/trix/Documentos/Projects/Git/AnyComic-FDevs/AnyComic.csproj": {}
   },
   "projects": {
-    "C:\\Users\\pedro.tunin\\Documents\\ASPNET\\AnyComic\\AnyComic.csproj": {
+    "/home/trix/Documentos/Projects/Git/AnyComic-FDevs/AnyComic.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\pedro.tunin\\Documents\\ASPNET\\AnyComic\\AnyComic.csproj",
+        "projectUniqueName": "/home/trix/Documentos/Projects/Git/AnyComic-FDevs/AnyComic.csproj",
         "projectName": "AnyComic",
-        "projectPath": "C:\\Users\\pedro.tunin\\Documents\\ASPNET\\AnyComic\\AnyComic.csproj",
-        "packagesPath": "C:\\Users\\pedro.tunin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\pedro.tunin\\Documents\\ASPNET\\AnyComic\\obj\\",
+        "projectPath": "/home/trix/Documentos/Projects/Git/AnyComic-FDevs/AnyComic.csproj",
+        "packagesPath": "/home/trix/.nuget/packages/",
+        "outputPath": "/home/trix/Documentos/Projects/Git/AnyComic-FDevs/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\pedro.tunin\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/home/trix/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -77,7 +77,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.412/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/8.0.414/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
