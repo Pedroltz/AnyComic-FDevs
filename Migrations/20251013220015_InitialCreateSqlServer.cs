@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AnyComic.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreateSqlServer : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,13 +15,13 @@ namespace AnyComic.Migrations
                 name: "Mangas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Titulo = table.Column<string>(type: "TEXT", maxLength: 200, nullable: false),
-                    Autor = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Descricao = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: false),
-                    ImagemCapa = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    DataCriacao = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Titulo = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Autor = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Descricao = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    ImagemCapa = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    DataCriacao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -32,12 +32,12 @@ namespace AnyComic.Migrations
                 name: "Usuarios",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Nome = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Senha = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    DataCriacao = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Senha = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    DataCriacao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -48,13 +48,13 @@ namespace AnyComic.Migrations
                 name: "UsuariosAdmin",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Nome = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    Senha = table.Column<string>(type: "TEXT", maxLength: 255, nullable: false),
-                    DataCriacao = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsAdmin = table.Column<bool>(type: "INTEGER", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Senha = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    DataCriacao = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsAdmin = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -65,12 +65,12 @@ namespace AnyComic.Migrations
                 name: "PaginasMangas",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    MangaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    NumeroPagina = table.Column<int>(type: "INTEGER", nullable: false),
-                    CaminhoImagem = table.Column<string>(type: "TEXT", maxLength: 500, nullable: false),
-                    DataUpload = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MangaId = table.Column<int>(type: "int", nullable: false),
+                    NumeroPagina = table.Column<int>(type: "int", nullable: false),
+                    CaminhoImagem = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    DataUpload = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -87,11 +87,11 @@ namespace AnyComic.Migrations
                 name: "Favoritos",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    UsuarioId = table.Column<int>(type: "INTEGER", nullable: false),
-                    MangaId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataAdicao = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UsuarioId = table.Column<int>(type: "int", nullable: false),
+                    MangaId = table.Column<int>(type: "int", nullable: false),
+                    DataAdicao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {

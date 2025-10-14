@@ -3,6 +3,7 @@ using System;
 using AnyComic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -11,29 +12,35 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AnyComic.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251010163106_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251013220015_InitialCreateSqlServer")]
+    partial class InitialCreateSqlServer
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.9");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
             modelBuilder.Entity("AnyComic.Models.Favorito", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataAdicao")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MangaId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("UsuarioId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -49,30 +56,32 @@ namespace AnyComic.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Autor")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("ImagemCapa")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
@@ -83,21 +92,23 @@ namespace AnyComic.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("CaminhoImagem")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<DateTime>("DataUpload")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("MangaId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("NumeroPagina")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -110,25 +121,27 @@ namespace AnyComic.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Senha")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 
@@ -142,28 +155,30 @@ namespace AnyComic.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsAdmin")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bit");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Senha")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("nvarchar(255)");
 
                     b.HasKey("Id");
 

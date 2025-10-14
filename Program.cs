@@ -7,9 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configurar Entity Framework com SQLite
+// Configurar Entity Framework com SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configurar autenticação com cookies
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
