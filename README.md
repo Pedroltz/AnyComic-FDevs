@@ -304,17 +304,6 @@ dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 
-### Erro 404 ao acessar área administrativa
-
-**Solução:**
-1. Certifique-se de estar logado
-2. Verifique se o usuário tem permissão de admin
-3. Use o usuário padrão: `admin@anycomic.com` / `admin123`
-
-## Licença
-
-Este projeto foi desenvolvido para fins educacionais como parte do curso de ASP.NET Core MVC.
-
 ## Metodologia e Arquitetura
 
 Desenvolvido utilizando:
