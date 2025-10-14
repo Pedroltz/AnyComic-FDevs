@@ -8,36 +8,55 @@ using System.Text;
 
 namespace AnyComic.Controllers
 {
-    [Authorize]
+    /// <summary>
+    /// Controller responsável por gerenciar operações administrativas do sistema.
+    /// Permite CRUD completo de mangás, upload de páginas e gerenciamento de administradores.
+    /// </summary>
+    [Authorize] // Requer que o usuário esteja autenticado
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
 
+        /// <summary>
+        /// Construtor com injeção de dependências
+        /// </summary>
+        /// <param name="context">Contexto do banco de dados para operações com Entity Framework</param>
+        /// <param name="environment">Informações do ambiente para gerenciar caminhos de arquivos</param>
         public AdminController(ApplicationDbContext context, IWebHostEnvironment environment)
         {
             _context = context;
             _environment = environment;
         }
 
+        /// <summary>
+        /// Verifica se o usuário atual possui permissões de administrador
+        /// </summary>
+        /// <returns>True se for administrador, False caso contrário</returns>
         private bool IsAdmin()
         {
             return User.Claims.FirstOrDefault(c => c.Type == "IsAdmin")?.Value == "True";
         }
 
-        // GET: Admin
+        /// <summary>
+        /// GET: Admin/Index - Exibe a lista de todos os mangás cadastrados (READ)
+        /// </summary>
         public async Task<IActionResult> Index()
         {
+            // Verifica permissões de administrador
             if (!IsAdmin())
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
 
+            // Busca todos os mangás incluindo suas páginas relacionadas
             var mangas = await _context.Mangas.Include(m => m.Paginas).ToListAsync();
             return View(mangas);
         }
 
-        // GET: Admin/CreateManga
+        /// <summary>
+        /// GET: Admin/CreateManga - Exibe o formulário de criação de mangá (CREATE)
+        /// </summary>
         public IActionResult CreateManga()
         {
             if (!IsAdmin())
@@ -48,7 +67,11 @@ namespace AnyComic.Controllers
             return View();
         }
 
-        // POST: Admin/CreateManga
+        /// <summary>
+        /// POST: Admin/CreateManga - Processa a criação de um novo mangá (CREATE)
+        /// </summary>
+        /// <param name="manga">Objeto Manga com os dados do formulário</param>
+        /// <param name="imagemCapa">Arquivo de imagem da capa (opcional)</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateManga(Manga manga, IFormFile? imagemCapa)
@@ -60,8 +83,10 @@ namespace AnyComic.Controllers
 
             if (ModelState.IsValid)
             {
+                // Se uma imagem de capa foi enviada, realiza o upload
                 if (imagemCapa != null && imagemCapa.Length > 0)
                 {
+                    // Gera nome único para evitar conflitos
                     var fileName = $"{Guid.NewGuid()}_{imagemCapa.FileName}";
                     var uploadsDir = Path.Combine(_environment.WebRootPath, "uploads", "capas");
 
@@ -73,11 +98,13 @@ namespace AnyComic.Controllers
 
                     var filePath = Path.Combine(uploadsDir, fileName);
 
+                    // Salva o arquivo no servidor
                     using (var stream = new FileStream(filePath, FileMode.Create))
                     {
                         await imagemCapa.CopyToAsync(stream);
                     }
 
+                    // Define o caminho relativo para armazenar no banco
                     manga.ImagemCapa = $"/uploads/capas/{fileName}";
                 }
 
@@ -91,7 +118,10 @@ namespace AnyComic.Controllers
             return View(manga);
         }
 
-        // GET: Admin/EditManga/5
+        /// <summary>
+        /// GET: Admin/EditManga/5 - Exibe o formulário de edição de mangá (UPDATE)
+        /// </summary>
+        /// <param name="id">ID do mangá a ser editado</param>
         public async Task<IActionResult> EditManga(int? id)
         {
             if (!IsAdmin())
@@ -113,7 +143,9 @@ namespace AnyComic.Controllers
             return View(manga);
         }
 
-        // POST: Admin/EditManga/5
+        /// <summary>
+        /// POST: Admin/EditManga/5 - Processa a atualização de um mangá (UPDATE)
+        /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditManga(int id, [Bind("Id,Titulo,Autor,Descricao,ImagemCapa,DataCriacao")] Manga manga, IFormFile? imagemCapa)

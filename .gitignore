@@ -1,5 +1,7 @@
-# Arquivos Markdown
+# Arquivos Markdown (exceto README e Diagramas)
 *.md
+!README.md
+!Diagramas/*.md
 
 # Build results
 [Dd]ebug/
