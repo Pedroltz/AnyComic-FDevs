@@ -6,15 +6,6 @@
 
 Sistema web desenvolvido em ASP.NET Core MVC para gerenciamento e leitura de mangás online, com área administrativa completa e sistema de autenticação.
 
-## Desenvolvedor
-
-**Pedro Luiz Tunin**
-
-Desenvolvedor em formação, atualmente cursando Ciências da Computação e trabalhando na Zion Logtech, onde ajudo a criar soluções inovadoras para logística através de software.
-
-- GitHub: [https://github.com/Pedroltz](https://github.com/Pedroltz)
-- LinkedIn: [https://www.linkedin.com/in/pedrotunin/](https://www.linkedin.com/in/pedrotunin/)
-
 ## Diagramas
 
 O projeto conta com diagramas técnicos que documentam a arquitetura e casos de uso do sistema:
