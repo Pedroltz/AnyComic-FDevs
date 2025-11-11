@@ -15,4 +15,11 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="nova_pasta\**" />
+    <Content Remove="nova_pasta\**" />
+    <EmbeddedResource Remove="nova_pasta\**" />
+    <None Remove="nova_pasta\**" />
+  </ItemGroup>
+
 </Project>

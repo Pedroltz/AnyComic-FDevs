@@ -1,57 +1,514 @@
 @model AnyComic.Models.PaginaManga
 
 @{
-    ViewData["Title"] = $"{ViewBag.MangaTitulo} - Página {ViewBag.PaginaAtual}";
+    ViewData["Title"] = $"{ViewBag.MangaTitulo} - Page {ViewBag.PaginaAtual}";
+    Layout = null; // No layout for immersive reading experience
 }
 
-<div class="container-fluid bg-dark min-vh-100 d-flex flex-column">
-    <div class="row bg-black text-white py-2">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <a asp-controller="Manga" asp-action="Details" asp-route-id="@ViewBag.MangaId" class="btn btn-sm btn-outline-light">
-                    Voltar
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --primary-red: #ef2c2f;
+            --bg-dark: #1a1a1a;
+            --bg-darker: #0d0d0d;
+            --text-light: #ffffff;
+            --text-muted: #999999;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Reader Container */
+        .reader-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Navigation Bar */
+        .reader-header {
+            background-color: var(--bg-darker);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .reader-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-center {
+            flex: 1;
+            text-align: center;
+        }
+
+        .manga-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .page-counter {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .reader-btn {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .reader-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: var(--text-light);
+        }
+
+        .reader-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .reader-btn-primary {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        .reader-btn-primary:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        /* Page Selector */
+        .page-selector {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .page-selector:focus {
+            outline: 2px solid var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        /* Image Viewer */
+        .image-viewer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--bg-dark);
+        }
+
+        .manga-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .manga-image.zoomed {
+            cursor: zoom-out;
+            max-width: none;
+            max-height: none;
+            width: auto;
+            height: auto;
+        }
+
+        /* Navigation Controls */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: var(--text-light);
+            width: 60px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .nav-arrow:hover:not(:disabled) {
+            background-color: rgba(239, 44, 47, 0.8);
+        }
+
+        .nav-arrow:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .nav-arrow.prev {
+            left: 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .nav-arrow.next {
+            right: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        /* Bottom Controls */
+        .reader-footer {
+            background-color: var(--bg-darker);
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .reader-footer.hidden {
+            transform: translateY(100%);
+        }
+
+        .footer-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        .progress-bar-custom {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+
+        /* Keyboard Hint */
+        .keyboard-hint {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+            z-index: 90;
+            animation: fadeOut 3s forwards;
+        }
+
+        @@keyframes fadeOut {
+            0%, 50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .reader-header {
+                padding: 10px 12px;
+            }
+
+            .manga-title {
+                font-size: 14px;
+            }
+
+            .page-counter {
+                font-size: 11px;
+            }
+
+            .reader-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .nav-arrow {
+                width: 50px;
+                height: 70px;
+            }
+
+            .header-center {
+                display: none;
+            }
+
+            .progress-bar-container {
+                max-width: 200px;
+                margin: 0 10px;
+            }
+
+            .keyboard-hint {
+                display: none;
+            }
+        }
+
+        /* Loading State */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="reader-container">
+        <!-- Top Navigation Bar -->
+        <header class="reader-header" id="readerHeader">
+            <div class="header-left">
+                <a href="@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })" class="reader-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                    Back
                 </a>
-                <h5 class="mb-0">@ViewBag.MangaTitulo - Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</h5>
-                <div></div>
             </div>
-        </div>
-    </div>
-
-    <div class="row flex-grow-1">
-        <div class="col text-center d-flex align-items-center justify-content-center">
-            <img src="@Model.CaminhoImagem" class="img-fluid" alt="Página @Model.NumeroPagina" style="max-height: 90vh;">
-        </div>
-    </div>
-
-    <div class="row bg-black text-white py-3">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                @if (ViewBag.PaginaAtual > 1)
-                {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual - 1)"
-                       class="btn btn-primary">
-                        Página Anterior
-                    </a>
-                }
-                else
-                {
-                    <button class="btn btn-secondary" disabled>Página Anterior</button>
-                }
-
-                <span>Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</span>
-
-                @if (ViewBag.PaginaAtual < ViewBag.TotalPaginas)
-                {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual + 1)"
-                       class="btn btn-primary">
-                        Próxima Página
-                    </a>
-                }
-                else
-                {
-                    <button class="btn btn-secondary" disabled>Próxima Página</button>
-                }
+            <div class="header-center">
+                <h1 class="manga-title">@ViewBag.MangaTitulo</h1>
+                <div class="page-counter">Page @ViewBag.PaginaAtual of @ViewBag.TotalPaginas</div>
             </div>
+            <div class="header-right">
+                <select class="page-selector" id="pageSelector" onchange="jumpToPage(this.value)">
+                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                    {
+                        if (i == ViewBag.PaginaAtual)
+                        {
+                            <option value="@i" selected>Page @i</option>
+                        }
+                        else
+                        {
+                            <option value="@i">Page @i</option>
+                        }
+                    }
+                </select>
+                <button class="reader-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Image Viewer with Navigation Arrows -->
+        <main class="image-viewer" id="imageViewer">
+            <button class="nav-arrow prev" id="prevBtn" onclick="previousPage()" @(ViewBag.PaginaAtual <= 1 ? "disabled" : "")>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </button>
+
+            <img src="@Model.CaminhoImagem"
+                 alt="Page @Model.NumeroPagina"
+                 class="manga-image"
+                 id="mangaImage"
+                 onclick="toggleZoom()"
+                 onload="hideLoading()">
+
+            <button class="nav-arrow next" id="nextBtn" onclick="nextPage()" @(ViewBag.PaginaAtual >= ViewBag.TotalPaginas ? "disabled" : "")>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+
+            <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+        </main>
+
+        <!-- Bottom Controls -->
+        <footer class="reader-footer" id="readerFooter">
+            <div class="footer-controls">
+                <button class="reader-btn" onclick="previousPage()" @(ViewBag.PaginaAtual <= 1 ? "disabled" : "")>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    Previous
+                </button>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-custom">
+                    <div class="progress-bar-fill" style="width: @((ViewBag.PaginaAtual * 100.0 / ViewBag.TotalPaginas).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <button class="reader-btn reader-btn-primary" onclick="nextPage()" @(ViewBag.PaginaAtual >= ViewBag.TotalPaginas ? "disabled" : "")>
+                    Next
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+
+        <!-- Keyboard Hint -->
+        <div class="keyboard-hint">
+            Use arrow keys to navigate
         </div>
     </div>
-</div>
+
+    <script>
+        const mangaId = @ViewBag.MangaId;
+        const currentPage = @ViewBag.PaginaAtual;
+        const totalPages = @ViewBag.TotalPaginas;
+
+        // Keyboard Navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft' && currentPage > 1) {
+                previousPage();
+            } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+                nextPage();
+            } else if (e.key === 'Escape') {
+                window.location.href = '@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })';
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            }
+        });
+
+        function previousPage() {
+            if (currentPage > 1) {
+                navigateToPage(currentPage - 1);
+            }
+        }
+
+        function nextPage() {
+            if (currentPage < totalPages) {
+                navigateToPage(currentPage + 1);
+            }
+        }
+
+        function jumpToPage(page) {
+            navigateToPage(parseInt(page));
+        }
+
+        function navigateToPage(page) {
+            showLoading();
+            window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId + '&pagina=' + page;
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        function toggleZoom() {
+            const img = document.getElementById('mangaImage');
+            img.classList.toggle('zoomed');
+        }
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Auto-hide controls on mouse inactivity
+        let hideTimeout;
+        let isMouseMoving = false;
+
+        function showControls() {
+            document.getElementById('readerHeader').classList.remove('hidden');
+            document.getElementById('readerFooter').classList.remove('hidden');
+        }
+
+        function hideControls() {
+            if (!isMouseMoving) {
+                document.getElementById('readerHeader').classList.add('hidden');
+                document.getElementById('readerFooter').classList.add('hidden');
+            }
+        }
+
+        document.addEventListener('mousemove', function() {
+            isMouseMoving = true;
+            showControls();
+            clearTimeout(hideTimeout);
+            hideTimeout = setTimeout(function() {
+                isMouseMoving = false;
+                hideControls();
+            }, 3000);
+        });
+
+        // Initial timeout
+        hideTimeout = setTimeout(hideControls, 3000);
+
+        // Preload next page for faster navigation
+        if (currentPage < totalPages) {
+            const nextPageUrl = '@Url.Action("Read", "Manga")?id=' + mangaId + '&pagina=' + (currentPage + 1);
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = nextPageUrl;
+            document.head.appendChild(link);
+        }
+    </script>
+</body>
+</html>

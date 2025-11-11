@@ -20,12 +20,16 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         var mangas = await _context.Mangas.ToListAsync();
-        return View(mangas);
-    }
 
-    public IActionResult Sobre()
-    {
-        return View();
+        // Get active banners ordered by display order
+        var banners = await _context.Banners
+            .Where(b => b.Ativo)
+            .OrderBy(b => b.Ordem)
+            .ToListAsync();
+
+        ViewBag.Banners = banners;
+
+        return View(mangas);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -40,9 +40,5 @@ button.accept-policy[b-0tfuak2szy] {
 }
 
 .footer[b-0tfuak2szy] {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px;
+  /* Footer positioning removed - using styles from site.css instead */
 }

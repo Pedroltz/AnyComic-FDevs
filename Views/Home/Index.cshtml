@@ -2,49 +2,102 @@
 
 @{
     ViewData["Title"] = "Home - AnyComic";
+    var banners = ViewBag.Banners as List<AnyComic.Models.Banner>;
 }
 
-<div class="container">
-    <div class="text-center mb-5">
-        <h1 class="display-4">Bem-vindo ao AnyComic</h1>
-        <p class="lead">Seu portal de mangás online</p>
-    </div>
-
-    @if (Model != null && Model.Any())
-    {
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
-            @foreach (var manga in Model)
+<!-- Banner Carousel -->
+@if (banners != null && banners.Any())
+{
+    <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" style="margin-bottom: 40px;">
+        <div class="carousel-indicators">
+            @for (int i = 0; i < banners.Count; i++)
             {
-                <div class="col">
-                    <div class="card h-100 shadow-sm manga-card">
-                        @if (!string.IsNullOrEmpty(manga.ImagemCapa))
-                        {
-                            <img src="@manga.ImagemCapa" class="card-img-top manga-cover" alt="@manga.Titulo">
-                        }
-                        else
-                        {
-                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 350px;">
-                                <span class="text-white">Sem capa</span>
-                            </div>
-                        }
-                        <div class="card-body">
-                            <h5 class="card-title">@manga.Titulo</h5>
-                            <p class="card-text text-muted"><small>Por @manga.Autor</small></p>
-                            <p class="card-text">@(manga.Descricao.Length > 100 ? manga.Descricao.Substring(0, 100) + "..." : manga.Descricao)</p>
-                        </div>
-                        <div class="card-footer bg-transparent">
-                            <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" class="btn btn-primary w-100">Ver Detalhes</a>
+                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+            }
+        </div>
+        <div class="carousel-inner">
+            @for (int i = 0; i < banners.Count; i++)
+            {
+                var banner = banners[i];
+                <div class="carousel-item @(i == 0 ? "active" : "")">
+                    <div class="banner-container">
+                        <img src="@banner.ImagemUrl" class="d-block w-100 banner-image" alt="@banner.Titulo">
+                        <div class="carousel-caption-custom">
+                            <h2 class="banner-title">@banner.Titulo</h2>
+                            @if (!string.IsNullOrEmpty(banner.Subtitulo))
+                            {
+                                <p class="banner-subtitle">@banner.Subtitulo</p>
+                            }
                         </div>
                     </div>
                 </div>
             }
         </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+}
+
+<!-- Page Container - HotComics Style -->
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title">Popular Manga</h1>
+        <p class="page-subtitle">Discover the best manga and comics</p>
+    </div>
+
+    @if (Model != null && Model.Any())
+    {
+        <!-- Manga Grid - HotComics Style -->
+        <div class="manga-grid fade-in">
+            @foreach (var manga in Model)
+            {
+                <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" style="text-decoration: none; color: inherit;">
+                    <div class="manga-card">
+                        <div class="manga-card-image">
+                            @if (!string.IsNullOrEmpty(manga.ImagemCapa))
+                            {
+                                <img src="@manga.ImagemCapa" alt="@manga.Titulo" loading="lazy">
+                            }
+                            else
+                            {
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                    </svg>
+                                    <p style="margin-top: 8px; font-size: 12px;">No cover</p>
+                                </div>
+                            }
+                        </div>
+                        <div class="manga-card-body">
+                            <h3 class="manga-card-title">@manga.Titulo</h3>
+                            <p class="manga-card-author">@manga.Autor</p>
+                            <div class="manga-card-info">
+                                <span>@manga.DataCriacao.ToString("MMM dd, yyyy")</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
     }
     else
     {
-        <div class="alert alert-info text-center" role="alert">
-            <h4>Nenhum mangá disponível no momento</h4>
-            <p>Volte em breve para conferir novos mangás!</p>
+        <!-- Empty State -->
+        <div class="alert alert-info text-center" style="margin-top: 40px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 15px; opacity: 0.5;">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+            <h4 style="font-weight: 600; margin-bottom: 10px;">No manga available</h4>
+            <p style="margin-bottom: 0; color: #6c757d;">Check back soon for new content!</p>
         </div>
     }
 </div>

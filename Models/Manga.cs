@@ -3,61 +3,62 @@ using System.ComponentModel.DataAnnotations;
 namespace AnyComic.Models
 {
     /// <summary>
-    /// Representa um mangá no sistema.
-    /// Esta é a entidade principal do CRUD administrativo.
+    /// Represents a manga in the system.
+    /// This is the main entity of the administrative CRUD.
     /// </summary>
     public class Manga
     {
         /// <summary>
-        /// Identificador único do mangá (chave primária)
+        /// Unique identifier of the manga (primary key)
         /// </summary>
         [Key]
         public int Id { get; set; }
 
         /// <summary>
-        /// Título do mangá (obrigatório, máximo 200 caracteres)
+        /// Title of the manga (required, maximum 200 characters)
         /// </summary>
-        [Required(ErrorMessage = "O título é obrigatório")]
+        [Required(ErrorMessage = "The title is required")]
         [StringLength(200)]
         public string Titulo { get; set; } = string.Empty;
 
         /// <summary>
-        /// Nome do autor do mangá (obrigatório, máximo 100 caracteres)
+        /// Name of the manga author (required, maximum 100 characters)
         /// </summary>
-        [Required(ErrorMessage = "O autor é obrigatório")]
+        [Required(ErrorMessage = "The author is required")]
         [StringLength(100)]
         public string Autor { get; set; } = string.Empty;
 
         /// <summary>
-        /// Descrição ou sinopse do mangá (obrigatório, máximo 1000 caracteres)
+        /// Description or synopsis of the manga (required, maximum 1000 characters)
         /// </summary>
-        [Required(ErrorMessage = "A descrição é obrigatória")]
+        [Required(ErrorMessage = "The description is required")]
         [StringLength(1000)]
         public string Descricao { get; set; } = string.Empty;
 
         /// <summary>
-        /// Caminho relativo da imagem de capa (máximo 500 caracteres)
-        /// Exemplo: /uploads/capas/imagem.jpg
+        /// Relative path of the cover image (maximum 500 characters)
+        /// Example: /uploads/capas/imagem.jpg
         /// </summary>
         [StringLength(500)]
         public string ImagemCapa { get; set; } = string.Empty;
 
         /// <summary>
-        /// Data de criação do registro no sistema
+        /// Release date of the manga (provided by the administrator)
         /// </summary>
-        public DateTime DataCriacao { get; set; } = DateTime.Now;
+        [Required(ErrorMessage = "The release date is required")]
+        public DateTime DataCriacao { get; set; }
 
-        // Relacionamentos (Navigation Properties)
+        // Relationships (Navigation Properties)
 
         /// <summary>
-        /// Coleção de páginas associadas a este mangá
-        /// Relacionamento 1:N (um mangá tem muitas páginas)
+        /// Collection of pages associated with this manga
+        /// 1:N relationship (one manga has many pages)
         /// </summary>
         public ICollection<PaginaManga> Paginas { get; set; } = new List<PaginaManga>();
 
         /// <summary>
-        /// Coleção de favoritos associados a este mangá
-        /// Relacionamento N:N através da tabela Favoritos
+        /// Collection of favorites associated with this manga
+        /// N:N relationship through the Favoritos table
         /// </summary>
         public ICollection<Favorito> Favoritos { get; set; } = new List<Favorito>();
     }

@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Criar Administrador";
+    ViewData["Title"] = "Create Administrator";
 }
 
 <div class="container">
@@ -7,7 +7,7 @@
         <div class="col-md-6">
             <div class="card shadow">
                 <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Criar Novo Administrador</h2>
+                    <h2 class="card-title text-center mb-4">Create New Administrator</h2>
 
                     @if (ViewBag.Error != null)
                     {
@@ -27,7 +27,7 @@
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label for="nome" class="form-label">Nome Completo</label>
+                            <label for="nome" class="form-label">Full Name</label>
                             <input type="text" class="form-control" id="nome" name="nome" required>
                         </div>
 
@@ -37,18 +37,18 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="senha" class="form-label">Senha</label>
+                            <label for="senha" class="form-label">Password</label>
                             <input type="password" class="form-control" id="senha" name="senha" required minlength="6">
                         </div>
 
                         <div class="mb-3">
-                            <label for="confirmarSenha" class="form-label">Confirmar Senha</label>
+                            <label for="confirmarSenha" class="form-label">Confirm Password</label>
                             <input type="password" class="form-control" id="confirmarSenha" name="confirmarSenha" required minlength="6">
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Criar Administrador</button>
-                            <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Voltar</a>
+                            <button type="submit" class="btn btn-primary">Create Administrator</button>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Back</a>
                         </div>
                     </form>
                 </div>

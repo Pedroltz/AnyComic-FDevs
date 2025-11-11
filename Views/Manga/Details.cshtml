@@ -4,75 +4,124 @@
     ViewData["Title"] = Model.Titulo;
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
-            @if (!string.IsNullOrEmpty(Model.ImagemCapa))
-            {
-                <img src="@Model.ImagemCapa" class="img-fluid rounded shadow" alt="@Model.Titulo">
-            }
-            else
-            {
-                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 500px;">
-                    <span>Sem capa</span>
-                </div>
-            }
-        </div>
-
-        <div class="col-md-8">
-            <h1 class="display-5">@Model.Titulo</h1>
-            <p class="lead text-muted">Por @Model.Autor</p>
-
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Descrição</h5>
-                    <p class="card-text">@Model.Descricao</p>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Informações</h5>
-                    <p class="mb-1"><strong>Páginas:</strong> @Model.Paginas.Count</p>
-                    <p class="mb-0"><strong>Adicionado em:</strong> @Model.DataCriacao.ToString("dd/MM/yyyy")</p>
-                </div>
-            </div>
-
-            <div class="d-grid gap-2">
-                @if (Model.Paginas.Any())
+<!-- Manga Details - HotComics Style -->
+<div class="page-container">
+    <div class="manga-details fade-in">
+        <div class="row">
+            <!-- Cover Image -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                @if (!string.IsNullOrEmpty(Model.ImagemCapa))
                 {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@Model.Id" class="btn btn-primary btn-lg">
-                        Começar a Ler
-                    </a>
+                    <img src="@Model.ImagemCapa" class="manga-details-cover" alt="@Model.Titulo">
                 }
                 else
                 {
-                    <button class="btn btn-secondary btn-lg" disabled>
-                        Sem páginas disponíveis
-                    </button>
+                    <div class="manga-details-cover" style="background-color: #2a2a2a; display: flex; align-items: center; justify-content: center; aspect-ratio: 2/3;">
+                        <div style="text-align: center; color: #808080;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                            </svg>
+                            <p style="margin-top: 10px; font-size: 14px;">No cover</p>
+                        </div>
+                    </div>
                 }
+            </div>
 
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    @if (ViewBag.IsFavorito == true)
+            <!-- Manga Information -->
+            <div class="col-lg-9 col-md-8">
+                <h1 class="manga-details-title">@Model.Titulo</h1>
+                <p class="manga-details-author">by @Model.Autor</p>
+
+                <!-- Info Grid -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div style="background-color: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #b0b0b0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Status</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #f0f0f0;">
+                                @if (Model.Paginas.Any())
+                                {
+                                    <span style="color: #28a745;">Available</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #808080;">No pages</span>
+                                }
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="background-color: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #b0b0b0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Pages</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #f0f0f0;">@Model.Paginas.Count</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div style="background-color: #2a2a2a; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                            <p style="margin: 0; color: #b0b0b0; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Published</p>
+                            <p style="margin: 5px 0 0 0; font-size: 16px; font-weight: 600; color: #f0f0f0;">@Model.DataCriacao.ToString("MMMM dd, yyyy")</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div style="margin-bottom: 25px;">
+                    <h3 style="font-size: 20px; font-weight: 600; color: #f0f0f0; margin-bottom: 12px;">Description</h3>
+                    <p class="manga-details-description">@Model.Descricao</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex">
+                    @if (Model.Paginas.Any())
                     {
-                        <form method="post" asp-controller="Manga" asp-action="RemoveFavorito" asp-route-id="@Model.Id">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-danger btn-lg">
-                                Remover dos Favoritos
-                            </button>
-                        </form>
+                        <a asp-controller="Manga" asp-action="Read" asp-route-id="@Model.Id" class="btn btn-primary btn-lg" style="min-width: 200px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 8px;">
+                                <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                            </svg>
+                            Start Reading
+                        </a>
                     }
                     else
                     {
-                        <form method="post" asp-controller="Manga" asp-action="AddFavorito" asp-route-id="@Model.Id">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-success btn-lg">
-                                Adicionar aos Favoritos
-                            </button>
-                        </form>
+                        <button class="btn btn-secondary btn-lg" disabled style="min-width: 200px;">
+                            No pages available
+                        </button>
                     }
-                }
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        @if (ViewBag.IsFavorito == true)
+                        {
+                            <form method="post" asp-controller="Manga" asp-action="RemoveFavorito" asp-route-id="@Model.Id" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-primary btn-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 8px;">
+                                        <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                    </svg>
+                                    Remove Favorite
+                                </button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form method="post" asp-controller="Manga" asp-action="AddFavorito" asp-route-id="@Model.Id" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn btn-outline-primary btn-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 8px;">
+                                        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                    </svg>
+                                    Add to Favorites
+                                </button>
+                            </form>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">
+                            Sign in to add favorites
+                        </a>
+                    }
+                </div>
             </div>
         </div>
     </div>

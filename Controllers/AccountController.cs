@@ -32,7 +32,7 @@ namespace AnyComic.Controllers
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(senha))
             {
-                ViewBag.Error = "Email e senha são obrigatórios";
+                ViewBag.Error = "Email and password are required";
                 return View();
             }
 
@@ -45,7 +45,7 @@ namespace AnyComic.Controllers
 
                 if (admin == null)
                 {
-                    ViewBag.Error = "Email ou senha inválidos";
+                    ViewBag.Error = "Invalid email or password";
                     return View();
                 }
 
@@ -59,7 +59,7 @@ namespace AnyComic.Controllers
 
                 if (usuario == null)
                 {
-                    ViewBag.Error = "Email ou senha inválidos";
+                    ViewBag.Error = "Invalid email or password";
                     return View();
                 }
 
@@ -82,20 +82,20 @@ namespace AnyComic.Controllers
             if (string.IsNullOrEmpty(nome) || string.IsNullOrEmpty(email) ||
                 string.IsNullOrEmpty(senha) || string.IsNullOrEmpty(confirmarSenha))
             {
-                ViewBag.Error = "Todos os campos são obrigatórios";
+                ViewBag.Error = "All fields are required";
                 return View();
             }
 
             if (senha != confirmarSenha)
             {
-                ViewBag.Error = "As senhas não coincidem";
+                ViewBag.Error = "Passwords do not match";
                 return View();
             }
 
             var existingUser = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
             if (existingUser != null)
             {
-                ViewBag.Error = "Email já cadastrado";
+                ViewBag.Error = "Email already registered";
                 return View();
             }
 

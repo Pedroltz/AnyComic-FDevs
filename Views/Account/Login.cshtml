@@ -1,14 +1,16 @@
 @{
-    ViewData["Title"] = "Login - AnyComic";
+    ViewData["Title"] = "Sign in - AnyComic";
 }
 
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Entrar</h2>
-
+<!-- Login Page - HotComics Style -->
+<div class="page-container">
+    <div class="row justify-content-center" style="margin-top: 60px;">
+        <div class="col-lg-5 col-md-6">
+            <div class="modal-content fade-in">
+                <div class="modal-header">
+                    <h2 class="modal-title w-100 text-center" style="font-size: 24px;">Sign in to AnyComic</h2>
+                </div>
+                <div class="modal-body">
                     @if (ViewBag.Error != null)
                     {
                         <div class="alert alert-danger" role="alert">
@@ -20,31 +22,36 @@
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
                         </div>
 
                         <div class="mb-3">
-                            <label for="senha" class="form-label">Senha</label>
-                            <input type="password" class="form-control" id="senha" name="senha" required>
+                            <label for="senha" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="senha" name="senha" placeholder="Enter your password" required>
                         </div>
 
                         <div class="mb-3 form-check">
                             <input type="checkbox" class="form-check-input" id="isAdmin" name="isAdmin" value="true">
-                            <label class="form-check-label" for="isAdmin">
-                                Entrar como Administrador
+                            <label class="form-check-label" for="isAdmin" style="font-size: 14px;">
+                                Sign in as Administrator
                             </label>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Entrar</button>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Sign in</button>
                         </div>
                     </form>
 
-                    <hr class="my-4">
+                    <hr class="my-4" style="border-color: #dee2e6;">
 
                     <div class="text-center">
-                        <p>Não tem uma conta? <a asp-controller="Account" asp-action="Register">Registre-se aqui</a></p>
+                        <p style="margin: 0; color: #6c757d; font-size: 14px;">
+                            Don't have an account?
+                            <a asp-controller="Account" asp-action="Register" style="color: #ef2c2f; font-weight: 600; text-decoration: none;">
+                                Sign up here
+                            </a>
+                        </p>
                     </div>
                 </div>
             </div>

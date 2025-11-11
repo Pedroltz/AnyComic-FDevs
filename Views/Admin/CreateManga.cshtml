@@ -1,42 +1,61 @@
 @model AnyComic.Models.Manga
 
 @{
-    ViewData["Title"] = "Adicionar Mangá - Admin";
+    ViewData["Title"] = "Create Manga - AnyComic";
 }
 
-<div class="container">
-    <h1 class="mb-4">Adicionar Novo Mangá</h1>
-
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-body">
+<!-- Create Manga - HotComics Style -->
+<div class="page-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="modal-content fade-in">
+                <div class="modal-header">
+                    <h2 class="modal-title w-100 text-center" style="font-size: 24px;">Add New Manga</h2>
+                </div>
+                <div class="modal-body">
                     <form method="post" asp-controller="Admin" asp-action="CreateManga" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label asp-for="Titulo" class="form-label">Título</label>
-                            <input asp-for="Titulo" class="form-control" required>
+                            <label asp-for="Titulo" class="form-label">Title *</label>
+                            <input asp-for="Titulo" class="form-control" placeholder="Enter manga title" required>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Autor" class="form-label">Autor</label>
-                            <input asp-for="Autor" class="form-control" required>
+                            <label asp-for="Autor" class="form-label">Author *</label>
+                            <input asp-for="Autor" class="form-control" placeholder="Enter author name" required>
                         </div>
 
                         <div class="mb-3">
-                            <label asp-for="Descricao" class="form-label">Descrição</label>
-                            <textarea asp-for="Descricao" class="form-control" rows="5" required></textarea>
+                            <label asp-for="Descricao" class="form-label">Description *</label>
+                            <textarea asp-for="Descricao" class="form-control" rows="5" placeholder="Enter manga description" required></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label for="imagemCapa" class="form-label">Imagem de Capa</label>
+                            <label asp-for="DataCriacao" class="form-label">Release Date *</label>
+                            <input asp-for="DataCriacao" type="date" class="form-control" required>
+                            <div class="form-text">Select the release date of the manga</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imagemCapa" class="form-label">Cover Image</label>
                             <input type="file" class="form-control" id="imagemCapa" name="imagemCapa" accept="image/*">
+                            <div class="form-text">Upload a cover image (JPG, PNG, GIF, WEBP)</div>
                         </div>
 
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success">Salvar</button>
-                            <a asp-controller="Admin" asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 5px;">
+                                    <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+                                </svg>
+                                Save
+                            </button>
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-outline-primary flex-fill">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-top; margin-right: 5px;">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                </svg>
+                                Cancel
+                            </a>
                         </div>
                     </form>
                 </div>

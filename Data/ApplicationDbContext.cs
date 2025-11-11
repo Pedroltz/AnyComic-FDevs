@@ -15,6 +15,7 @@ namespace AnyComic.Data
         public DbSet<Manga> Mangas { get; set; }
         public DbSet<PaginaManga> PaginasMangas { get; set; }
         public DbSet<Favorito> Favoritos { get; set; }
+        public DbSet<Banner> Banners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
