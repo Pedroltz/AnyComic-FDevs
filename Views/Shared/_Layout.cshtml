@@ -23,18 +23,9 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link" asp-area="" asp-controller="Manga" asp-action="Favoritos">Favorite List</a>
-                            </li>
-                            @if (User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True"))
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
-                                </li>
-                            }
-                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Manga" asp-action="Index">Manga</a>
+                        </li>
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
@@ -52,6 +43,16 @@
                                     @User.Identity.Name
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-area="" asp-controller="Manga" asp-action="Favoritos">Favorite List</a>
+                                    </li>
+                                    @if (User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True"))
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-area="" asp-controller="Admin" asp-action="Index">Admin</a>
+                                        </li>
+                                    }
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="post" asp-controller="Account" asp-action="Logout">
                                             @Html.AntiForgeryToken()

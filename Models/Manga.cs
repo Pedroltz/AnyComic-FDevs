@@ -51,6 +51,12 @@ namespace AnyComic.Models
         // Relationships (Navigation Properties)
 
         /// <summary>
+        /// Collection of chapters associated with this manga
+        /// 1:N relationship (one manga has many chapters)
+        /// </summary>
+        public ICollection<Capitulo> Capitulos { get; set; } = new List<Capitulo>();
+
+        /// <summary>
         /// Collection of pages associated with this manga
         /// 1:N relationship (one manga has many pages)
         /// </summary>

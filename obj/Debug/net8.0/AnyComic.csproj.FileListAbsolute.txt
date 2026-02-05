@@ -507,3 +507,4 @@ C:\Users\Usuario\Documents\Projetos\AnyComic-FDevs\obj\Debug\net8.0\refint\AnyCo
 C:\Users\Usuario\Documents\Projetos\AnyComic-FDevs\obj\Debug\net8.0\AnyComic.pdb
 C:\Users\Usuario\Documents\Projetos\AnyComic-FDevs\obj\Debug\net8.0\AnyComic.genruntimeconfig.cache
 C:\Users\Usuario\Documents\Projetos\AnyComic-FDevs\obj\Debug\net8.0\ref\AnyComic.dll
+c:\Users\Usuario\Documents\Projetos\AnyComic-FDevs\bin\Debug\net8.0\HtmlAgilityPack.dll

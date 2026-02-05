@@ -3,6 +3,13 @@
 @{
     ViewData["Title"] = $"{ViewBag.MangaTitulo} - Page {ViewBag.PaginaAtual}";
     Layout = null; // No layout for immersive reading experience
+
+    var capituloAtual = (AnyComic.Models.Capitulo)ViewBag.CapituloAtual;
+    var capitulos = (List<AnyComic.Models.Capitulo>)ViewBag.Capitulos;
+    var proximoCapitulo = ViewBag.ProximoCapitulo as AnyComic.Models.Capitulo;
+    var capituloAnterior = ViewBag.CapituloAnterior as AnyComic.Models.Capitulo;
+    int paginaAtual = (int)ViewBag.PaginaAtual;
+    int totalPaginas = (int)ViewBag.TotalPaginas;
 }
 
 <!DOCTYPE html>
@@ -260,6 +267,83 @@
             100% { opacity: 0; }
         }
 
+        /* Chapter Transition Modal */
+        .chapter-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chapter-modal-overlay.active {
+            display: flex;
+        }
+
+        .chapter-modal-card {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .chapter-modal-card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .chapter-modal-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .chapter-modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chapter-modal-btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .chapter-modal-btn-primary {
+            background-color: var(--primary-red);
+            color: var(--text-light);
+        }
+
+        .chapter-modal-btn-primary:hover {
+            background-color: #dc3545;
+        }
+
+        .chapter-modal-btn-secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chapter-modal-btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+
         /* Responsive Design */
         @@media (max-width: 768px) {
             .reader-header {
@@ -296,6 +380,10 @@
             .keyboard-hint {
                 display: none;
             }
+
+            .chapter-modal-card {
+                padding: 28px 20px;
+            }
         }
 
         /* Loading State */
@@ -331,13 +419,28 @@
             </div>
             <div class="header-center">
                 <h1 class="manga-title">@ViewBag.MangaTitulo</h1>
-                <div class="page-counter">Page @ViewBag.PaginaAtual of @ViewBag.TotalPaginas</div>
+                <div class="page-counter">
+                    @capituloAtual.NomeExibicao - Page @paginaAtual of @totalPaginas
+                </div>
             </div>
             <div class="header-right">
-                <select class="page-selector" id="pageSelector" onchange="jumpToPage(this.value)">
-                    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+                <select class="page-selector" id="chapterSelector" onchange="changeChapter(this.value)" title="Select Chapter">
+                    @foreach (var cap in capitulos)
                     {
-                        if (i == ViewBag.PaginaAtual)
+                        if (cap.Id == capituloAtual.Id)
+                        {
+                            <option value="@cap.NumeroCapitulo" selected>@cap.NomeExibicao</option>
+                        }
+                        else
+                        {
+                            <option value="@cap.NumeroCapitulo">@cap.NomeExibicao</option>
+                        }
+                    }
+                </select>
+                <select class="page-selector" id="pageSelector" onchange="jumpToPage(this.value)" title="Select Page">
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        if (i == paginaAtual)
                         {
                             <option value="@i" selected>Page @i</option>
                         }
@@ -357,7 +460,7 @@
 
         <!-- Image Viewer with Navigation Arrows -->
         <main class="image-viewer" id="imageViewer">
-            <button class="nav-arrow prev" id="prevBtn" onclick="previousPage()" @(ViewBag.PaginaAtual <= 1 ? "disabled" : "")>
+            <button class="nav-arrow prev" id="prevBtn" onclick="previousPage()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                 </svg>
@@ -370,7 +473,7 @@
                  onclick="toggleZoom()"
                  onload="hideLoading()">
 
-            <button class="nav-arrow next" id="nextBtn" onclick="nextPage()" @(ViewBag.PaginaAtual >= ViewBag.TotalPaginas ? "disabled" : "")>
+            <button class="nav-arrow next" id="nextBtn" onclick="nextPage()">
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                 </svg>
@@ -382,7 +485,7 @@
         <!-- Bottom Controls -->
         <footer class="reader-footer" id="readerFooter">
             <div class="footer-controls">
-                <button class="reader-btn" onclick="previousPage()" @(ViewBag.PaginaAtual <= 1 ? "disabled" : "")>
+                <button class="reader-btn" id="prevBtnFooter" onclick="previousPage()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                     </svg>
@@ -392,12 +495,12 @@
 
             <div class="progress-bar-container">
                 <div class="progress-bar-custom">
-                    <div class="progress-bar-fill" style="width: @((ViewBag.PaginaAtual * 100.0 / ViewBag.TotalPaginas).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                    <div class="progress-bar-fill" style="width: @((paginaAtual * 100.0 / totalPaginas).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))%"></div>
                 </div>
             </div>
 
             <div class="footer-controls">
-                <button class="reader-btn reader-btn-primary" onclick="nextPage()" @(ViewBag.PaginaAtual >= ViewBag.TotalPaginas ? "disabled" : "")>
+                <button class="reader-btn reader-btn-primary" id="nextBtnFooter" onclick="nextPage()">
                     Next
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
@@ -412,16 +515,48 @@
         </div>
     </div>
 
+    <!-- Chapter Transition Modal -->
+    <div class="chapter-modal-overlay" id="chapterModal">
+        <div class="chapter-modal-card">
+            <h2 id="chapterModalTitle"></h2>
+            <p id="chapterModalText"></p>
+            <div class="chapter-modal-buttons">
+                <button class="chapter-modal-btn chapter-modal-btn-primary" id="chapterModalAction" onclick="chapterModalNavigate()"></button>
+                <button class="chapter-modal-btn chapter-modal-btn-secondary" onclick="closeChapterModal()">Back</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const mangaId = @ViewBag.MangaId;
-        const currentPage = @ViewBag.PaginaAtual;
-        const totalPages = @ViewBag.TotalPaginas;
+        const currentPage = @paginaAtual;
+        const totalPages = @totalPaginas;
+        const currentChapterNum = @capituloAtual.NumeroCapitulo;
+        const hasNextChapter = @(proximoCapitulo != null ? "true" : "false");
+        const hasPrevChapter = @(capituloAnterior != null ? "true" : "false");
+        const nextChapterNum = @(proximoCapitulo != null ? proximoCapitulo.NumeroCapitulo : 0);
+        const prevChapterNum = @(capituloAnterior != null ? capituloAnterior.NumeroCapitulo : 0);
+        const nextChapterName = '@Html.Raw(proximoCapitulo != null ? System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(proximoCapitulo.NomeExibicao) : "")';
+        const prevChapterName = '@Html.Raw(capituloAnterior != null ? System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(capituloAnterior.NomeExibicao) : "")';
+        const currentChapterName = '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(capituloAtual.NomeExibicao))';
+
+        let pendingChapterNav = null; // 'next' or 'prev'
 
         // Keyboard Navigation
         document.addEventListener('keydown', function(e) {
-            if (e.key === 'ArrowLeft' && currentPage > 1) {
+            const modal = document.getElementById('chapterModal');
+            if (modal.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeChapterModal();
+                } else if (e.key === 'Enter') {
+                    chapterModalNavigate();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowLeft') {
                 previousPage();
-            } else if (e.key === 'ArrowRight' && currentPage < totalPages) {
+            } else if (e.key === 'ArrowRight') {
                 nextPage();
             } else if (e.key === 'Escape') {
                 window.location.href = '@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })';
@@ -433,22 +568,74 @@
         function previousPage() {
             if (currentPage > 1) {
                 navigateToPage(currentPage - 1);
+            } else if (hasPrevChapter) {
+                showChapterModal('prev');
             }
         }
 
         function nextPage() {
             if (currentPage < totalPages) {
                 navigateToPage(currentPage + 1);
+            } else if (hasNextChapter) {
+                showChapterModal('next');
             }
         }
 
-        function jumpToPage(page) {
-            navigateToPage(parseInt(page));
+        function jumpToPage(pageNum) {
+            navigateToPage(parseInt(pageNum));
         }
 
-        function navigateToPage(page) {
+        function changeChapter(capituloNumero) {
             showLoading();
-            window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId + '&pagina=' + page;
+            window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                '&capituloNumero=' + capituloNumero +
+                '&pagina=1';
+        }
+
+        function navigateToPage(pageNum) {
+            showLoading();
+            window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                '&capituloNumero=' + currentChapterNum +
+                '&pagina=' + pageNum;
+        }
+
+        function showChapterModal(direction) {
+            pendingChapterNav = direction;
+            const modal = document.getElementById('chapterModal');
+            const title = document.getElementById('chapterModalTitle');
+            const text = document.getElementById('chapterModalText');
+            const actionBtn = document.getElementById('chapterModalAction');
+
+            if (direction === 'next') {
+                title.textContent = 'End of ' + currentChapterName;
+                text.textContent = 'Continue to ' + nextChapterName + '?';
+                actionBtn.textContent = 'Next Chapter';
+            } else {
+                title.textContent = 'Start of ' + currentChapterName;
+                text.textContent = 'Go back to ' + prevChapterName + '?';
+                actionBtn.textContent = 'Previous Chapter';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeChapterModal() {
+            document.getElementById('chapterModal').classList.remove('active');
+            pendingChapterNav = null;
+        }
+
+        function chapterModalNavigate() {
+            if (pendingChapterNav === 'next') {
+                showLoading();
+                window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                    '&capituloNumero=' + nextChapterNum +
+                    '&pagina=1';
+            } else if (pendingChapterNav === 'prev') {
+                showLoading();
+                window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                    '&capituloNumero=' + prevChapterNum +
+                    '&pagina=last';
+            }
         }
 
         function toggleFullscreen() {
@@ -503,7 +690,9 @@
 
         // Preload next page for faster navigation
         if (currentPage < totalPages) {
-            const nextPageUrl = '@Url.Action("Read", "Manga")?id=' + mangaId + '&pagina=' + (currentPage + 1);
+            const nextPageUrl = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                '&capituloNumero=' + currentChapterNum +
+                '&pagina=' + (currentPage + 1);
             const link = document.createElement('link');
             link.rel = 'prefetch';
             link.href = nextPageUrl;

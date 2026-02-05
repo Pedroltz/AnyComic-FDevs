@@ -16,24 +16,173 @@
                     <form method="post" asp-controller="Admin" asp-action="CreateManga" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
+                        <!-- Advanced Settings Button -->
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-outline-secondary w-100" data-bs-toggle="collapse" data-bs-target="#advancedSettings" aria-expanded="false" aria-controls="advancedSettings">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 5px;">
+                                    <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+                                </svg>
+                                Advanced Settings
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16" class="ms-2" style="transition: transform 0.3s;">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Advanced Settings Collapse -->
+                        <div class="collapse" id="advancedSettings">
+                            <div class="card shadow-sm mb-4" style="border: 1px solid var(--border-color); background-color: var(--bg-light);">
+                                <div class="card-header" style="background-color: var(--bg-darker); color: var(--text-primary); border-bottom: 1px solid var(--border-color);">
+                                    <h6 class="mb-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 8px;">
+                                            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                            <path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05z"/>
+                                        </svg>
+                                        Batch Import System
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <!-- Import Source Selector -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2zm13 2.383-4.708 2.825L15 11.105V5.383zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741zM1 11.105l4.708-2.897L1 5.383v5.722z"/>
+                                            </svg>
+                                            Import Source
+                                        </label>
+                                        <input type="hidden" id="importSourceValue" value="ehentai">
+                                        <div class="dropdown w-100">
+                                            <button class="btn dropdown-toggle w-100 text-start d-flex justify-content-between align-items-center" type="button" id="importSourceDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="background-color: var(--bg-primary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                                                <span id="importSourceLabel">E-Hentai</span>
+                                            </button>
+                                            <ul class="dropdown-menu w-100" aria-labelledby="importSourceDropdown">
+                                                <li><a class="dropdown-item import-source-option" href="#" data-value="ehentai" data-label="E-Hentai">E-Hentai</a></li>
+                                                <li><a class="dropdown-item import-source-option" href="#" data-value="mangadex" data-label="MangaDex">MangaDex</a></li>
+                                            </ul>
+                                        </div>
+                                        <div class="form-text">Select the source platform for batch import</div>
+                                    </div>
+
+                                    <!-- MangaDex Options (Hidden by default) -->
+                                    <div id="mangadexOptions" style="display: none;">
+                                        <!-- Language Selection -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                    <path d="M4.545 6.714 4.11 8H3l1.862-5h1.284L8 8H6.833l-.435-1.286H4.545zm1.634-.736L5.5 3.956h-.049l-.679 2.022H6.18z"/>
+                                                    <path d="M0 2a2 2 0 0 1 2-2h7a2 2 0 0 1 2 2v3h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-3H2a2 2 0 0 1-2-2V2zm2-1a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H2zm7.138 9.995c.193.301.402.583.63.846-.748.575-1.673 1.001-2.768 1.292.178.217.451.635.555.867 1.125-.359 2.08-.844 2.886-1.494.777.665 1.739 1.165 2.93 1.472.133-.254.414-.673.629-.89-1.125-.253-2.057-.694-2.82-1.284.681-.747 1.222-1.651 1.621-2.757H14V8h-3v1.047h.765c-.318.844-.74 1.546-1.272 2.13a6.066 6.066 0 0 1-.415-.492 1.988 1.988 0 0 1-.94.31z"/>
+                                                </svg>
+                                                Language
+                                            </label>
+                                            <select class="form-select" id="mangadexLanguage" style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color);">
+                                                <option value="en">English</option>
+                                                <option value="pt-br">Portuguese (Brazil)</option>
+                                                <option value="es-la">Spanish (Latin America)</option>
+                                                <option value="es">Spanish (Spain)</option>
+                                                <option value="fr">French</option>
+                                                <option value="de">German</option>
+                                                <option value="it">Italian</option>
+                                                <option value="ja">Japanese</option>
+                                                <option value="ko">Korean</option>
+                                                <option value="zh">Chinese (Simplified)</option>
+                                            </select>
+                                            <div class="form-text">Select the language for chapters to import</div>
+                                        </div>
+
+                                        <!-- Chapter Range Selection -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                    <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                                                </svg>
+                                                Chapters to Import
+                                            </label>
+                                            <input type="text" class="form-control" id="mangadexChapterRange" placeholder="e.g., all, 1-5, 1,3,5, or 1-5,10,15-20" value="all" style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color);">
+                                            <div class="form-text">
+                                                <strong>Examples:</strong> "all" = all chapters, "1-10" = chapters 1 to 10, "1,5,10" = specific chapters, "1-5,10,15-20" = mixed ranges
+                                            </div>
+                                        </div>
+
+                                        <!-- Image Quality -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                                </svg>
+                                                Image Quality
+                                            </label>
+                                            <select class="form-select" id="mangadexQuality" style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color);">
+                                                <option value="data">Original Quality (Larger files)</option>
+                                                <option value="data-saver">Compressed (Data Saver, smaller files)</option>
+                                            </select>
+                                            <div class="form-text">Original quality provides best images but larger file sizes</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Gallery URLs Input -->
+                                    <div class="mb-3">
+                                        <label for="ehentaiBatchUrls" class="form-label fw-semibold">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/>
+                                                <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/>
+                                            </svg>
+                                            Gallery URLs
+                                        </label>
+                                        <textarea class="form-control font-monospace" id="ehentaiBatchUrls" rows="10" placeholder="https://e-hentai.org/g/2431884/7a9b3b6bcc/&#10;https://e-hentai.org/g/1234567/abcdef1234/&#10;https://e-hentai.org/g/7654321/fedcba4321/" style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color); font-size: 0.875rem;"></textarea>
+                                        <div class="form-text">
+                                            <strong>Note:</strong> Paste one URL per line. Invalid URLs will be automatically skipped.
+                                        </div>
+                                    </div>
+
+                                    <!-- Import Button -->
+                                    <button type="button" class="btn btn-primary w-100 py-2 fw-semibold" id="btnBatchImport">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 6px;">
+                                            <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                                            <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+                                        </svg>
+                                        Start Batch Import (<span id="batchCount">0</span> URLs)
+                                    </button>
+
+                                    <!-- Batch Progress -->
+                                    <div id="batchProgress" class="mt-4" style="display: none;">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span id="batchProgressText" class="fw-semibold" style="color: var(--text-primary);">Processing...</span>
+                                            <span id="batchProgressPercent" class="badge bg-primary">0/0</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated"
+                                                 id="batchProgressBar"
+                                                 role="progressbar"
+                                                 style="width: 0%;">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Batch Messages -->
+                                    <div id="batchMessages" class="mt-4" style="display: none;"></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label asp-for="Titulo" class="form-label">Title *</label>
-                            <input asp-for="Titulo" class="form-control" placeholder="Enter manga title" required>
+                            <input asp-for="Titulo" class="form-control" placeholder="Enter manga title">
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Autor" class="form-label">Author *</label>
-                            <input asp-for="Autor" class="form-control" placeholder="Enter author name" required>
+                            <input asp-for="Autor" class="form-control" placeholder="Enter author name">
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Descricao" class="form-label">Description *</label>
-                            <textarea asp-for="Descricao" class="form-control" rows="5" placeholder="Enter manga description" required></textarea>
+                            <textarea asp-for="Descricao" class="form-control" rows="5" placeholder="Enter manga description"></textarea>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="DataCriacao" class="form-label">Release Date *</label>
-                            <input asp-for="DataCriacao" type="date" class="form-control" required>
+                            <input asp-for="DataCriacao" type="date" class="form-control">
                             <div class="form-text">Select the release date of the manga</div>
                         </div>
 
@@ -63,3 +212,203 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    // Import Source Dropdown functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const importSourceOptions = document.querySelectorAll('.import-source-option');
+        const importSourceValue = document.getElementById('importSourceValue');
+        const importSourceLabel = document.getElementById('importSourceLabel');
+        const mangadexOptions = document.getElementById('mangadexOptions');
+        const batchUrlsTextarea = document.getElementById('ehentaiBatchUrls');
+
+        importSourceOptions.forEach(option => {
+            option.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (!this.classList.contains('disabled')) {
+                    const value = this.getAttribute('data-value');
+                    const label = this.getAttribute('data-label');
+
+                    importSourceValue.value = value;
+                    importSourceLabel.textContent = label;
+
+                    // Show/hide MangaDex options and update placeholders based on selection
+                    if (value === 'mangadex') {
+                        mangadexOptions.style.display = 'block';
+                        batchUrlsTextarea.placeholder = 'https://mangadex.org/title/da88b8f1-0b6f-4e69-a07f-ec1c624b2aa7/manga-1\nhttps://mangadex.org/title/abc123def456-789/manga-2\nhttps://mangadex.org/title/xyz789-456-123/manga-3';
+                    } else {
+                        mangadexOptions.style.display = 'none';
+                        batchUrlsTextarea.placeholder = 'https://e-hentai.org/g/2431884/7a9b3b6bcc/\nhttps://e-hentai.org/g/1234567/abcdef1234/\nhttps://e-hentai.org/g/7654321/fedcba4321/';
+                    }
+                }
+            });
+        });
+    });
+
+    // Batch Import functionality
+    const batchUrlsTextarea = document.getElementById('ehentaiBatchUrls');
+    const batchCountSpan = document.getElementById('batchCount');
+    const btnBatchImport = document.getElementById('btnBatchImport');
+
+    // Update count when URLs are added/removed
+    batchUrlsTextarea.addEventListener('input', function() {
+        const urls = this.value.split('\n').filter(line => line.trim() !== '');
+        batchCountSpan.textContent = urls.length;
+    });
+
+    // Batch Import button click
+    btnBatchImport.addEventListener('click', async function() {
+        const urlsText = batchUrlsTextarea.value.trim();
+        const importSource = document.getElementById('importSourceValue').value;
+        const batchProgressContainer = document.getElementById('batchProgress');
+        const batchProgressBar = document.getElementById('batchProgressBar');
+        const batchProgressText = document.getElementById('batchProgressText');
+        const batchProgressPercent = document.getElementById('batchProgressPercent');
+        const batchMessagesContainer = document.getElementById('batchMessages');
+
+        // Parse URLs based on import source
+        let urls;
+        if (importSource === 'mangadex') {
+            urls = urlsText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '' && line.includes('mangadex.org/title/'));
+        } else {
+            urls = urlsText.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '' && (line.includes('e-hentai.org/g/') || line.includes('exhentai.org/g/')));
+        }
+
+        if (urls.length === 0) {
+            alert(`Please enter at least one valid ${importSource === 'mangadex' ? 'MangaDex' : 'e-hentai.org'} URL`);
+            return;
+        }
+
+        const sourceName = importSource === 'mangadex' ? 'MangaDex' : 'E-Hentai';
+        if (!confirm(`Import ${urls.length} manga(s) from ${sourceName}? This may take several minutes.`)) {
+            return;
+        }
+
+        // Disable button and show progress
+        btnBatchImport.disabled = true;
+        btnBatchImport.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+        batchProgressContainer.style.display = 'block';
+        batchMessagesContainer.style.display = 'block';
+        batchMessagesContainer.innerHTML = '';
+
+        let successCount = 0;
+        let failCount = 0;
+        const results = [];
+
+        for (let i = 0; i < urls.length; i++) {
+            const url = urls[i];
+            const progress = Math.round(((i + 1) / urls.length) * 100);
+
+            batchProgressBar.style.width = progress + '%';
+            batchProgressPercent.textContent = `${i + 1}/${urls.length}`;
+            batchProgressText.textContent = `Importing manga ${i + 1} of ${urls.length}...`;
+
+            try {
+                let response;
+
+                if (importSource === 'mangadex') {
+                    // Get MangaDex options for batch import
+                    const language = document.getElementById('mangadexLanguage').value;
+                    const chapterRange = document.getElementById('mangadexChapterRange').value;
+                    const quality = document.getElementById('mangadexQuality').value;
+
+                    response = await fetch('@Url.Action("ImportFromMangaDex", "Admin")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            url: url,
+                            language: language,
+                            chapterRange: chapterRange,
+                            quality: quality
+                        })
+                    });
+                } else {
+                    response = await fetch('@Url.Action("ImportFromEHentai", "Admin")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ url: url })
+                    });
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    successCount++;
+                    results.push({ url, success: true, message: result.message });
+                } else {
+                    failCount++;
+                    results.push({ url, success: false, message: result.message });
+                }
+            } catch (error) {
+                failCount++;
+                results.push({ url, success: false, message: error.message || 'Unknown error' });
+            }
+
+            // Add small delay between requests (longer for MangaDex due to more chapters)
+            if (i < urls.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, importSource === 'mangadex' ? 2000 : 1000));
+            }
+        }
+
+        // Show results
+        batchProgressText.textContent = 'Batch import completed!';
+
+        let messagesHtml = `
+            <div class="alert alert-${successCount > 0 ? 'success' : 'warning'}">
+                <strong>Batch Import Complete!</strong>
+                <ul class="mb-0 mt-2">
+                    <li><strong>${successCount}</strong> manga(s) imported successfully</li>
+                    <li><strong>${failCount}</strong> manga(s) failed to import</li>
+                </ul>
+            </div>
+        `;
+
+        // Show details
+        if (results.length > 0) {
+            messagesHtml += '<div class="list-group" style="max-height: 300px; overflow-y: auto;">';
+            results.forEach((result, index) => {
+                const iconColor = result.success ? 'success' : 'danger';
+                const icon = result.success ? '✓' : '✗';
+                messagesHtml += `
+                    <div class="list-group-item list-group-item-${iconColor === 'success' ? 'success' : 'danger'}">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1"><span class="badge bg-${iconColor}">${icon}</span> Manga ${index + 1}</h6>
+                        </div>
+                        <p class="mb-1 small">${result.message}</p>
+                        <small class="text-muted">${result.url.substring(0, 60)}...</small>
+                    </div>
+                `;
+            });
+            messagesHtml += '</div>';
+        }
+
+        batchMessagesContainer.innerHTML = messagesHtml;
+
+        // Re-enable button
+        btnBatchImport.disabled = false;
+        btnBatchImport.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 6px;">
+                <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+                <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+            </svg>
+            Start Batch Import (<span id="batchCount">${urls.length}</span> URLs)
+        `;
+
+        if (successCount > 0) {
+            setTimeout(() => {
+                window.location.href = '@Url.Action("Index", "Admin")';
+            }, 3000);
+        }
+    });
+</script>
+}
+
