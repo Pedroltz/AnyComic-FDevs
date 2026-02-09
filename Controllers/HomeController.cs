@@ -21,6 +21,12 @@ public class HomeController : Controller
     {
         var mangas = await _context.Mangas.ToListAsync();
 
+        // Get newest mangas (last 10 added)
+        var newest = await _context.Mangas
+            .OrderByDescending(m => m.DataCriacao)
+            .Take(10)
+            .ToListAsync();
+
         // Get active banners ordered by display order
         var banners = await _context.Banners
             .Where(b => b.Ativo)
@@ -28,6 +34,7 @@ public class HomeController : Controller
             .ToListAsync();
 
         ViewBag.Banners = banners;
+        ViewBag.NewestMangas = newest;
 
         return View(mangas);
     }

@@ -1087,6 +1087,252 @@ textarea.form-control:focus {
 
 
 /* ========================================
+   Newest Manga Row (Horizontal Scroll)
+   ======================================== */
+.section-header {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--primary-red);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.newest-row {
+  position: relative;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.newest-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 10px 0 10px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.newest-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.newest-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-red);
+  background: var(--bg-darker);
+  color: var(--primary-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--hover-transition), opacity 0.3s ease;
+  z-index: 2;
+}
+
+.newest-arrow:hover {
+  background: var(--primary-red);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4);
+}
+
+.newest-arrow-left {
+  margin-right: 12px;
+}
+
+.newest-arrow-right {
+  margin-left: 12px;
+}
+
+[data-theme="light"] .newest-arrow {
+  background: #fff;
+  border-color: var(--primary-red);
+  color: var(--primary-red);
+}
+
+[data-theme="light"] .newest-arrow:hover {
+  background: var(--primary-red);
+  color: #fff;
+}
+
+.newest-card-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  flex-shrink: 0;
+}
+
+.newest-card {
+  width: 155px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all var(--hover-transition);
+  cursor: pointer;
+}
+
+.newest-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(230, 57, 70, 0.3);
+  border-color: var(--primary-red);
+}
+
+.newest-card-image {
+  position: relative;
+  width: 100%;
+  padding-top: 140%;
+  overflow: hidden;
+  background-color: var(--bg-dark);
+}
+
+.newest-card-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--hover-transition);
+}
+
+.newest-card:hover .newest-card-image img {
+  transform: scale(1.05);
+}
+
+.newest-card-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.newest-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background-color: var(--primary-red);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.newest-card-body {
+  padding: 10px;
+}
+
+.newest-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-height: 1.3;
+}
+
+.newest-card-author {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .newest-card {
+    width: 130px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .newest-row {
+    position: relative;
+  }
+
+  .newest-scroll {
+    padding: 10px 4px;
+    gap: 12px;
+  }
+
+  .newest-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    margin: 0;
+    background: rgba(15, 15, 15, 0.85);
+    backdrop-filter: blur(4px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+  }
+
+  .newest-arrow svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .newest-arrow-left {
+    left: 4px;
+  }
+
+  .newest-arrow-right {
+    right: 4px;
+  }
+
+  [data-theme="light"] .newest-arrow {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Light theme overrides for newest section */
+[data-theme="light"] .newest-card {
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+}
+
+[data-theme="light"] .newest-card:hover {
+  border-color: var(--primary-red);
+  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.15);
+}
+
+[data-theme="light"] .newest-card-title {
+  color: #333 !important;
+}
+
+[data-theme="light"] .newest-card-author {
+  color: #6c757d !important;
+}
+
+[data-theme="light"] .section-title {
+  color: #333 !important;
+}
+
+/* ========================================
    Details Page Styles
    ======================================== */
 .manga-details {
@@ -1122,6 +1368,159 @@ textarea.form-control:focus {
   line-height: 1.8;
   color: var(--text-primary);
   margin-bottom: 25px;
+}
+
+/* ========================================
+   Chapter List Styles
+   ======================================== */
+.chapter-list {
+  background-color: var(--bg-darker);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.chapter-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+  text-decoration: none !important;
+  color: inherit !important;
+  gap: 14px;
+}
+
+.chapter-item:last-child {
+  border-bottom: none;
+}
+
+.chapter-item:hover {
+  background: linear-gradient(90deg, rgba(239, 44, 47, 0.06) 0%, transparent 100%);
+  padding-left: 24px;
+}
+
+.chapter-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 2px solid #00d9a3;
+  border-radius: 8px;
+}
+
+.chapter-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.chapter-name {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chapter-meta {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.chapter-meta small {
+  color: var(--text-muted);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chapter-read-btn {
+  flex-shrink: 0;
+  background: linear-gradient(135deg, #ef2c2f 0%, #dc1f27 100%);
+  color: #fff !important;
+  border: none;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 44, 47, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chapter-item:hover .chapter-read-btn {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 44, 47, 0.5);
+}
+
+@media (max-width: 768px) {
+  .chapter-item {
+    padding: 14px 14px;
+    gap: 10px;
+  }
+
+  .chapter-item:hover {
+    padding-left: 14px;
+  }
+
+  .chapter-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .chapter-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .chapter-name {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .chapter-meta {
+    gap: 10px;
+  }
+
+  .chapter-meta small {
+    font-size: 11px;
+  }
+
+  .chapter-read-btn {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Light theme chapter list */
+[data-theme="light"] .chapter-list {
+  background-color: #ffffff;
+  border-color: #dee2e6;
+}
+
+[data-theme="light"] .chapter-item {
+  border-color: #eee;
+}
+
+[data-theme="light"] .chapter-item:hover {
+  background: linear-gradient(90deg, rgba(239, 44, 47, 0.04) 0%, transparent 100%);
+}
+
+[data-theme="light"] .chapter-name {
+  color: #333 !important;
+}
+
+[data-theme="light"] .chapter-meta small {
+  color: #999 !important;
 }
 
 /* ========================================

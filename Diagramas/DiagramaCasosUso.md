@@ -14,7 +14,7 @@ graph TB
         end
 
         subgraph Usuario["Funcionalidades de Usuário"]
-            UC2[Ler Mangá Página por Página]
+            UC2[Ler Mangá por Capítulo]
             UC5[Adicionar Mangá aos Favoritos]
             UC6[Remover Mangá dos Favoritos]
             UC12[Visualizar Meus Favoritos]
@@ -24,9 +24,13 @@ graph TB
             UC7[Criar Novo Mangá]
             UC8[Editar Mangá Existente]
             UC9[Excluir Mangá]
-            UC10[Upload de Páginas do Mangá]
+            UC10[Upload de Páginas por Capítulo]
             UC11[Gerenciar Administradores]
             UC13[Deletar Páginas]
+            UC14[Gerenciar Capítulos]
+            UC15[Importar Mangá via E-Hentai]
+            UC16[Importar Mangá via MangaDex]
+            UC17[Gerenciar Banners do Carrossel]
         end
     end
 
@@ -53,11 +57,17 @@ graph TB
     Administrador --> UC10
     Administrador --> UC11
     Administrador --> UC13
+    Administrador --> UC14
+    Administrador --> UC15
+    Administrador --> UC16
+    Administrador --> UC17
 
     %% Relacionamentos de inclusão
-    UC7 -.include.-> UC10
-    UC8 -.include.-> UC10
+    UC7 -.include.-> UC14
+    UC14 -.include.-> UC10
     UC9 -.include.-> UC13
+    UC15 -.include.-> UC7
+    UC16 -.include.-> UC7
 ```
 
 ## Atores do Sistema:
@@ -71,7 +81,7 @@ Usuário não autenticado que pode:
 ### 2. Usuário Logado
 Usuário autenticado que pode:
 - Todas as funcionalidades do visitante
-- Ler mangás página por página
+- Ler mangás por capítulo com navegação entre páginas
 - Adicionar mangás aos favoritos
 - Remover mangás dos favoritos
 - Visualizar lista de favoritos
@@ -82,8 +92,11 @@ Usuário com privilégios administrativos que pode:
 - Criar novos mangás no sistema
 - Editar informações de mangás existentes
 - Excluir mangás do sistema
-- Fazer upload de páginas dos mangás
-- Gerenciar outros administradores
+- Gerenciar capítulos (criar, editar, excluir)
+- Fazer upload de páginas por capítulo
+- Importar mangás automaticamente via E-Hentai ou MangaDex
+- Gerenciar administradores
+- Gerenciar banners do carrossel da homepage
 - Deletar páginas individuais
 
 ## Casos de Uso Principais:
@@ -94,10 +107,15 @@ Usuário com privilégios administrativos que pode:
 - **Update (Editar)**: UC8 - Editar Mangá Existente
 - **Delete (Excluir)**: UC9 - Excluir Mangá
 
+### Importação em Lote
+- **UC15**: Importa mangás do E-Hentai via web scraping
+- **UC16**: Importa mangás do MangaDex via API oficial (com seleção de idioma, range de capítulos e qualidade)
+
 ### Relacionamentos:
-- **UC7 inclui UC10**: Ao criar um mangá, é possível fazer upload de páginas
-- **UC8 inclui UC10**: Ao editar um mangá, é possível adicionar mais páginas
+- **UC7 inclui UC14**: Ao criar um mangá, capítulos são gerenciados
+- **UC14 inclui UC10**: Ao gerenciar capítulos, é possível fazer upload de páginas
 - **UC9 inclui UC13**: Ao excluir um mangá, todas as páginas são deletadas
+- **UC15/UC16 inclui UC7**: Importação cria automaticamente o mangá com capítulos e páginas
 
 ## Como visualizar este diagrama:
 

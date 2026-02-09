@@ -182,11 +182,12 @@ namespace AnyComic.Controllers
             // Chapter-scoped navigation
             var paginasDoCapitulo = capituloAtual.Paginas.OrderBy(p => p.NumeroPagina).ToList();
 
-            // Build page map only for the current chapter
+            // Build page map only for the current chapter (includes image paths for client-side navigation)
             var pageMap = paginasDoCapitulo.Select((p, index) => new
             {
                 pagina = p.NumeroPagina,
-                index = index + 1
+                index = index + 1,
+                imagem = p.CaminhoImagem
             }).ToList();
 
             // Determine next/previous chapters

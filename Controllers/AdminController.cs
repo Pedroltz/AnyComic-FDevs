@@ -1327,6 +1327,7 @@ namespace AnyComic.Controllers
                 return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
+
     }
 
     /// <summary>
@@ -1356,4 +1357,5 @@ namespace AnyComic.Controllers
         public string? ChapterRange { get; set; }
         public string? Quality { get; set; }
     }
+
 }

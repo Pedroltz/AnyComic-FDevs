@@ -120,6 +120,7 @@
                                         </div>
                                     </div>
 
+
                                     <!-- Gallery URLs Input -->
                                     <div class="mb-3">
                                         <label for="ehentaiBatchUrls" class="form-label fw-semibold">
@@ -233,13 +234,14 @@
                     importSourceValue.value = value;
                     importSourceLabel.textContent = label;
 
-                    // Show/hide MangaDex options and update placeholders based on selection
+                    // Show/hide source-specific options
+                    mangadexOptions.style.display = (value === 'mangadex') ? 'block' : 'none';
+
+                    // Update placeholders based on selection
                     if (value === 'mangadex') {
-                        mangadexOptions.style.display = 'block';
-                        batchUrlsTextarea.placeholder = 'https://mangadex.org/title/da88b8f1-0b6f-4e69-a07f-ec1c624b2aa7/manga-1\nhttps://mangadex.org/title/abc123def456-789/manga-2\nhttps://mangadex.org/title/xyz789-456-123/manga-3';
+                        batchUrlsTextarea.placeholder = 'https://mangadex.org/title/da88b8f1-0b6f-4e69-a07f-ec1c624b2aa7/manga-1\nhttps://mangadex.org/title/abc123def456-789/manga-2';
                     } else {
-                        mangadexOptions.style.display = 'none';
-                        batchUrlsTextarea.placeholder = 'https://e-hentai.org/g/2431884/7a9b3b6bcc/\nhttps://e-hentai.org/g/1234567/abcdef1234/\nhttps://e-hentai.org/g/7654321/fedcba4321/';
+                        batchUrlsTextarea.placeholder = 'https://e-hentai.org/g/2431884/7a9b3b6bcc/\nhttps://e-hentai.org/g/1234567/abcdef1234/';
                     }
                 }
             });
@@ -280,7 +282,8 @@
         }
 
         if (urls.length === 0) {
-            alert(`Please enter at least one valid ${importSource === 'mangadex' ? 'MangaDex' : 'e-hentai.org'} URL`);
+            const sourceNames = { mangadex: 'MangaDex', ehentai: 'E-Hentai' };
+            alert(`Please enter at least one valid ${sourceNames[importSource] || importSource} URL`);
             return;
         }
 
@@ -353,9 +356,10 @@
                 results.push({ url, success: false, message: error.message || 'Unknown error' });
             }
 
-            // Add small delay between requests (longer for MangaDex due to more chapters)
+            // Add delay between requests (longer for sites with more chapters/scraping)
             if (i < urls.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, importSource === 'mangadex' ? 2000 : 1000));
+                const delay = importSource === 'mangadex' ? 2000 : 1000;
+                await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
 
