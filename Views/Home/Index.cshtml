@@ -21,16 +21,39 @@
             {
                 var banner = banners[i];
                 <div class="carousel-item @(i == 0 ? "active" : "")">
-                    <div class="banner-container">
-                        <img src="@banner.ImagemUrl" class="d-block w-100 banner-image" alt="@banner.Titulo">
-                        <div class="carousel-caption-custom">
-                            <h2 class="banner-title">@banner.Titulo</h2>
-                            @if (!string.IsNullOrEmpty(banner.Subtitulo))
-                            {
-                                <p class="banner-subtitle">@banner.Subtitulo</p>
-                            }
+                    @if (banner.Tipo == 1 && banner.Manga != null)
+                    {
+                        <div class="banner-showcase">
+                            <img src="@banner.ImagemUrl" class="banner-showcase-bg" alt="">
+                            <div class="banner-showcase-overlay"></div>
+                            <div class="banner-showcase-content">
+                                <div class="banner-showcase-cover">
+                                    <img src="@banner.Manga.ImagemCapa" alt="@banner.Manga.Titulo">
+                                </div>
+                                <div class="banner-showcase-info">
+                                    <h2 class="banner-showcase-title">@banner.Manga.Titulo</h2>
+                                    <p class="banner-showcase-author">@banner.Manga.Autor</p>
+                                    <p class="banner-showcase-description">@(banner.Manga.Descricao.Length > 200 ? banner.Manga.Descricao.Substring(0, 200) + "..." : banner.Manga.Descricao)</p>
+                                    <a asp-controller="Manga" asp-action="Details" asp-route-id="@banner.Manga.Id" class="btn btn-primary banner-showcase-btn">
+                                        Read Now
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="banner-container">
+                            <img src="@banner.ImagemUrl" class="d-block w-100 banner-image" alt="@banner.Titulo">
+                            <div class="carousel-caption-custom">
+                                <h2 class="banner-title">@banner.Titulo</h2>
+                                @if (!string.IsNullOrEmpty(banner.Subtitulo))
+                                {
+                                    <p class="banner-subtitle">@banner.Subtitulo</p>
+                                }
+                            </div>
+                        </div>
+                    }
                 </div>
             }
         </div>
@@ -51,14 +74,9 @@
     <!-- Newest Section -->
     @if (newestMangas != null && newestMangas.Any())
     {
-        <div class="section-header fade-in">
-            <h2 class="section-title">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="var(--primary-red)" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 8px;">
-                    <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
-                    <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
-                </svg>
-                Newest
-            </h2>
+        <div class="page-header fade-in">
+            <h1 class="page-title">Newest</h1>
+            <p class="page-subtitle">Recently added manga and comics</p>
         </div>
         <div class="newest-row fade-in">
             <button class="newest-arrow newest-arrow-left" onclick="scrollNewest(-1)" aria-label="Scroll left">

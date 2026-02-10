@@ -1,5 +1,6 @@
 @{
     ViewData["Title"] = "Create Banner - AnyComic";
+    var mangas = ViewBag.Mangas as List<AnyComic.Models.Manga>;
 }
 
 <!-- Create Banner - HotComics Style -->
@@ -22,19 +23,49 @@
                         @Html.AntiForgeryToken()
 
                         <div class="mb-3">
-                            <label for="titulo" class="form-label">Title *</label>
-                            <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Enter banner title" required maxlength="100">
+                            <label class="form-label">Banner Type *</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipo" id="tipoImage" value="0" checked onchange="toggleBannerType()">
+                                    <label class="form-check-label" for="tipoImage">Image</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="tipo" id="tipoShowcase" value="1" onchange="toggleBannerType()">
+                                    <label class="form-check-label" for="tipoShowcase">Manga Showcase</label>
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="mb-3" id="mangaSelectGroup" style="display: none;">
+                            <label for="mangaId" class="form-label">Select Manga *</label>
+                            <select class="form-select" id="mangaId" name="mangaId">
+                                <option value="">-- Select a manga --</option>
+                                @if (mangas != null)
+                                {
+                                    @foreach (var manga in mangas)
+                                    {
+                                        <option value="@manga.Id">@manga.Titulo — @manga.Autor</option>
+                                    }
+                                }
+                            </select>
+                            <div class="form-text">The manga's cover, title, author and description will be displayed on the banner</div>
+                        </div>
+
+                        <div class="mb-3" id="tituloGroup">
+                            <label for="titulo" class="form-label" id="tituloLabel">Title *</label>
+                            <input type="text" class="form-control" id="titulo" name="titulo" placeholder="Enter banner title" required maxlength="100">
+                            <div class="form-text" id="tituloHelpText" style="display: none;">Leave empty to use the manga title</div>
+                        </div>
+
+                        <div class="mb-3" id="subtituloGroup">
                             <label for="subtitulo" class="form-label">Subtitle (optional)</label>
                             <input type="text" class="form-control" id="subtitulo" name="subtitulo" placeholder="Enter banner subtitle" maxlength="200">
                         </div>
 
                         <div class="mb-3">
-                            <label for="imagemFile" class="form-label">Banner Image *</label>
+                            <label for="imagemFile" class="form-label" id="imageLabel">Banner Image *</label>
                             <input type="file" class="form-control" id="imagemFile" name="imagemFile" accept="image/*" required>
-                            <div class="form-text">Upload a banner image (JPG, PNG, GIF, WEBP - recommended size: 1920x600px)</div>
+                            <div class="form-text" id="imageHelpText">Upload a banner image (JPG, PNG, GIF, WEBP - recommended size: 1920x600px)</div>
                         </div>
 
                         <div class="mb-3">
@@ -70,3 +101,28 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script>
+    function toggleBannerType() {
+        var isShowcase = document.getElementById('tipoShowcase').checked;
+        var tituloInput = document.getElementById('titulo');
+        var imagemInput = document.getElementById('imagemFile');
+
+        document.getElementById('mangaSelectGroup').style.display = isShowcase ? 'block' : 'none';
+        document.getElementById('subtituloGroup').style.display = isShowcase ? 'none' : 'block';
+
+        // Title: optional for showcase, required for image
+        document.getElementById('tituloLabel').textContent = isShowcase ? 'Title (optional)' : 'Title *';
+        document.getElementById('tituloHelpText').style.display = isShowcase ? 'block' : 'none';
+        tituloInput.required = !isShowcase;
+
+        // Image: optional for showcase, required for image
+        document.getElementById('imageLabel').textContent = isShowcase ? 'Background Image (optional)' : 'Banner Image *';
+        document.getElementById('imageHelpText').textContent = isShowcase
+            ? 'Leave empty to use the manga cover as background (blurred). Or upload a custom background image.'
+            : 'Upload a banner image (JPG, PNG, GIF, WEBP - recommended size: 1920x600px)';
+        imagemInput.required = !isShowcase;
+    }
+</script>
+}

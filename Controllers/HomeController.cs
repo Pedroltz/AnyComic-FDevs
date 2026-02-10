@@ -27,8 +27,9 @@ public class HomeController : Controller
             .Take(10)
             .ToListAsync();
 
-        // Get active banners ordered by display order
+        // Get active banners ordered by display order (include Manga for showcase type)
         var banners = await _context.Banners
+            .Include(b => b.Manga)
             .Where(b => b.Ativo)
             .OrderBy(b => b.Ordem)
             .ToListAsync();

@@ -38,5 +38,20 @@ namespace AnyComic.Models
         /// </summary>
         [Required]
         public DateTime DataCriacao { get; set; } = DateTime.Now;
+
+        /// <summary>
+        /// Banner type: 0 = Image (default), 1 = Manga Showcase
+        /// </summary>
+        public int Tipo { get; set; } = 0;
+
+        /// <summary>
+        /// Foreign key to Manga (used when Tipo = 1)
+        /// </summary>
+        public int? MangaId { get; set; }
+
+        /// <summary>
+        /// Navigation property to the associated Manga
+        /// </summary>
+        public Manga? Manga { get; set; }
     }
 }

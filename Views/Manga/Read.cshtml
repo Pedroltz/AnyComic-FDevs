@@ -1139,6 +1139,9 @@
         document.addEventListener('fullscreenchange', function() {
             if (!document.fullscreenElement) {
                 document.querySelector('.reader-container').classList.remove('is-fullscreen');
+                // Show controls when exiting fullscreen
+                clearTimeout(hideTimeout);
+                showControls();
             }
         });
 
@@ -1150,9 +1153,13 @@
             document.getElementById('loadingSpinner').style.display = 'none';
         }
 
-        // Auto-hide controls on mouse inactivity
+        // Auto-hide controls on mouse inactivity (only in fullscreen)
         let hideTimeout;
         let isMouseMoving = false;
+
+        function isFullscreen() {
+            return !!document.fullscreenElement;
+        }
 
         function showControls() {
             document.getElementById('readerHeader').classList.remove('hidden');
@@ -1161,7 +1168,7 @@
         }
 
         function hideControls() {
-            if (!isMouseMoving) {
+            if (!isMouseMoving && isFullscreen()) {
                 document.getElementById('readerHeader').classList.add('hidden');
                 document.getElementById('readerFooter').classList.add('hidden');
                 document.getElementById('zoomControls').classList.remove('visible');
@@ -1172,14 +1179,13 @@
             isMouseMoving = true;
             showControls();
             clearTimeout(hideTimeout);
-            hideTimeout = setTimeout(function() {
-                isMouseMoving = false;
-                hideControls();
-            }, 3000);
+            if (isFullscreen()) {
+                hideTimeout = setTimeout(function() {
+                    isMouseMoving = false;
+                    hideControls();
+                }, 3000);
+            }
         });
-
-        // Initial timeout
-        hideTimeout = setTimeout(hideControls, 3000);
 
         // Preload adjacent page images for faster client-side navigation
         function preloadAdjacentPages() {

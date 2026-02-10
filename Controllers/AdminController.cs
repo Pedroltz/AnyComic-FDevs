@@ -960,68 +960,115 @@ namespace AnyComic.Controllers
         // ==================== Banner Management ====================
 
         // GET: Admin/CreateBanner
-        public IActionResult CreateBanner()
+        public async Task<IActionResult> CreateBanner()
         {
             if (!IsAdmin())
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
 
+            ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
             return View();
         }
 
         // POST: Admin/CreateBanner
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateBanner(string titulo, string? subtitulo, IFormFile? imagemFile, int ordem, bool ativo = true)
+        public async Task<IActionResult> CreateBanner(string? titulo, string? subtitulo, IFormFile? imagemFile, int ordem, bool ativo = true, int tipo = 0, int? mangaId = null)
         {
             if (!IsAdmin())
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
 
-            if (string.IsNullOrEmpty(titulo))
+            // For Image type, title and image are required
+            if (tipo == 0)
             {
-                ViewBag.Error = "Title is required";
-                return View();
+                if (string.IsNullOrEmpty(titulo))
+                {
+                    ViewBag.Error = "Title is required for Image banners";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View();
+                }
+
+                if (imagemFile == null || imagemFile.Length == 0)
+                {
+                    ViewBag.Error = "Image is required for Image banners";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View();
+                }
             }
 
-            if (imagemFile == null || imagemFile.Length == 0)
+            // Validate manga selection for showcase type
+            Manga? manga = null;
+            if (tipo == 1)
+            {
+                if (mangaId == null)
+                {
+                    ViewBag.Error = "Please select a manga for the Manga Showcase banner";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View();
+                }
+
+                manga = await _context.Mangas.FindAsync(mangaId);
+                if (manga == null)
+                {
+                    ViewBag.Error = "Selected manga not found";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View();
+                }
+            }
+
+            string imagemUrl;
+
+            // If an image was uploaded, save it
+            if (imagemFile != null && imagemFile.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
+                var extension = Path.GetExtension(imagemFile.FileName).ToLowerInvariant();
+
+                if (!allowedExtensions.Contains(extension))
+                {
+                    ViewBag.Error = "Only image files are allowed (jpg, jpeg, png, gif, webp)";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View();
+                }
+
+                var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "carousel");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = $"{Guid.NewGuid()}{extension}";
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await imagemFile.CopyToAsync(fileStream);
+                }
+
+                imagemUrl = $"/uploads/carousel/{uniqueFileName}";
+            }
+            else if (tipo == 1 && manga != null)
+            {
+                // For showcase without uploaded image, use manga cover
+                imagemUrl = manga.ImagemCapa;
+            }
+            else
             {
                 ViewBag.Error = "Image is required";
+                ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
                 return View();
-            }
-
-            // Validate file type
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var extension = Path.GetExtension(imagemFile.FileName).ToLowerInvariant();
-
-            if (!allowedExtensions.Contains(extension))
-            {
-                ViewBag.Error = "Only image files are allowed (jpg, jpeg, png, gif, webp)";
-                return View();
-            }
-
-            // Save file
-            var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "carousel");
-            Directory.CreateDirectory(uploadsFolder);
-
-            var uniqueFileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await imagemFile.CopyToAsync(fileStream);
             }
 
             var banner = new Banner
             {
-                Titulo = titulo,
+                Titulo = tipo == 1 && string.IsNullOrEmpty(titulo) && manga != null ? manga.Titulo : titulo ?? string.Empty,
                 Subtitulo = subtitulo,
-                ImagemUrl = $"/uploads/carousel/{uniqueFileName}",
+                ImagemUrl = imagemUrl,
                 Ordem = ordem,
                 Ativo = ativo,
-                DataCriacao = DateTime.Now
+                DataCriacao = DateTime.Now,
+                Tipo = tipo,
+                MangaId = tipo == 1 ? mangaId : null
             };
 
             _context.Banners.Add(banner);
@@ -1043,19 +1090,20 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            var banner = await _context.Banners.FindAsync(id);
+            var banner = await _context.Banners.Include(b => b.Manga).FirstOrDefaultAsync(b => b.Id == id);
             if (banner == null)
             {
                 return NotFound();
             }
 
+            ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
             return View(banner);
         }
 
         // POST: Admin/EditBanner/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditBanner(int id, string titulo, string? subtitulo, IFormFile? imagemFile, int ordem, bool ativo)
+        public async Task<IActionResult> EditBanner(int id, string? titulo, string? subtitulo, IFormFile? imagemFile, int ordem, bool ativo, int tipo = 0, int? mangaId = null)
         {
             if (!IsAdmin())
             {
@@ -1068,27 +1116,49 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            if (string.IsNullOrEmpty(titulo))
+            // For Image type, title is required
+            if (tipo == 0 && string.IsNullOrEmpty(titulo))
             {
-                ViewBag.Error = "Title is required";
+                ViewBag.Error = "Title is required for Image banners";
+                ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
                 return View(banner);
+            }
+
+            // Validate manga selection for showcase type
+            Manga? manga = null;
+            if (tipo == 1)
+            {
+                if (mangaId == null)
+                {
+                    ViewBag.Error = "Please select a manga for the Manga Showcase banner";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View(banner);
+                }
+
+                manga = await _context.Mangas.FindAsync(mangaId);
+                if (manga == null)
+                {
+                    ViewBag.Error = "Selected manga not found";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
+                    return View(banner);
+                }
             }
 
             // If a new image was uploaded, upload it
             if (imagemFile != null && imagemFile.Length > 0)
             {
-                // Validate file type
                 var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
                 var extension = Path.GetExtension(imagemFile.FileName).ToLowerInvariant();
 
                 if (!allowedExtensions.Contains(extension))
                 {
                     ViewBag.Error = "Only image files are allowed (jpg, jpeg, png, gif, webp)";
+                    ViewBag.Mangas = await _context.Mangas.OrderBy(m => m.Titulo).ToListAsync();
                     return View(banner);
                 }
 
-                // Delete old image if it exists
-                if (!string.IsNullOrEmpty(banner.ImagemUrl))
+                // Delete old carousel image if it was uploaded (not a manga cover path)
+                if (!string.IsNullOrEmpty(banner.ImagemUrl) && banner.ImagemUrl.StartsWith("/uploads/carousel/"))
                 {
                     var oldImagePath = Path.Combine(_environment.WebRootPath, banner.ImagemUrl.TrimStart('/'));
                     if (System.IO.File.Exists(oldImagePath))
@@ -1097,7 +1167,6 @@ namespace AnyComic.Controllers
                     }
                 }
 
-                // Save new image
                 var uploadsFolder = Path.Combine(_environment.WebRootPath, "uploads", "carousel");
                 Directory.CreateDirectory(uploadsFolder);
 
@@ -1111,11 +1180,18 @@ namespace AnyComic.Controllers
 
                 banner.ImagemUrl = $"/uploads/carousel/{uniqueFileName}";
             }
+            else if (tipo == 1 && manga != null && string.IsNullOrEmpty(banner.ImagemUrl))
+            {
+                // If showcase and no existing image, use manga cover
+                banner.ImagemUrl = manga.ImagemCapa;
+            }
 
-            banner.Titulo = titulo;
+            banner.Titulo = tipo == 1 && string.IsNullOrEmpty(titulo) && manga != null ? manga.Titulo : titulo ?? string.Empty;
             banner.Subtitulo = subtitulo;
             banner.Ordem = ordem;
             banner.Ativo = ativo;
+            banner.Tipo = tipo;
+            banner.MangaId = tipo == 1 ? mangaId : null;
 
             _context.Update(banner);
             await _context.SaveChangesAsync();

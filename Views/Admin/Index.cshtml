@@ -276,6 +276,7 @@
                                     <th style="width: 100px;">Preview</th>
                                     <th>Title</th>
                                     <th>Subtitle</th>
+                                    <th style="width: 120px;">Type</th>
                                     <th style="width: 80px;">Order</th>
                                     <th style="width: 80px;">Status</th>
                                     <th style="width: 120px;">Created</th>
@@ -291,6 +292,20 @@
                                         </td>
                                         <td style="font-weight: 600; color: #333;">@banner.Titulo</td>
                                         <td style="color: #6c757d; font-size: 14px;">@(string.IsNullOrEmpty(banner.Subtitulo) ? "-" : banner.Subtitulo)</td>
+                                        <td>
+                                            @if (banner.Tipo == 1)
+                                            {
+                                                <span style="background-color: rgba(230, 57, 70, 0.2); color: var(--primary-red); padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                                    Showcase
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span style="background-color: rgba(23, 162, 184, 0.2); color: #17a2b8; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                                    Image
+                                                </span>
+                                            }
+                                        </td>
                                         <td>
                                             <span style="background-color: #f8f9fa; padding: 4px 10px; border-radius: 12px; font-size: 13px; font-weight: 600; color: #333;">
                                                 @banner.Ordem

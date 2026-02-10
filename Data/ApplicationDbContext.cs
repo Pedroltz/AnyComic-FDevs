@@ -70,6 +70,13 @@ namespace AnyComic.Data
             modelBuilder.Entity<Favorito>()
                 .HasIndex(f => new { f.UsuarioId, f.MangaId })
                 .IsUnique();
+
+            // Configurar relacionamento Banner -> Manga (opcional)
+            modelBuilder.Entity<Banner>()
+                .HasOne(b => b.Manga)
+                .WithMany()
+                .HasForeignKey(b => b.MangaId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

@@ -1105,19 +1105,15 @@ textarea.form-control:focus {
 .newest-row {
   position: relative;
   margin-bottom: 40px;
-  display: flex;
-  align-items: center;
-  gap: 0;
 }
 
 .newest-scroll {
   display: flex;
   gap: 16px;
   overflow-x: auto;
-  padding: 10px 0 10px;
+  padding: 10px 0;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-  flex: 1;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
@@ -1127,7 +1123,9 @@ textarea.form-control:focus {
 }
 
 .newest-arrow {
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1139,7 +1137,7 @@ textarea.form-control:focus {
   justify-content: center;
   cursor: pointer;
   transition: all var(--hover-transition), opacity 0.3s ease;
-  z-index: 2;
+  z-index: 5;
 }
 
 .newest-arrow:hover {
@@ -1149,15 +1147,15 @@ textarea.form-control:focus {
 }
 
 .newest-arrow-left {
-  margin-right: 12px;
+  left: -52px;
 }
 
 .newest-arrow-right {
-  margin-left: 12px;
+  right: -52px;
 }
 
 [data-theme="light"] .newest-arrow {
-  background: #fff;
+  background: var(--bg-darker);
   border-color: var(--primary-red);
   color: var(--primary-red);
 }
@@ -1273,7 +1271,7 @@ textarea.form-control:focus {
   }
 
   .newest-scroll {
-    padding: 10px 4px;
+    padding: 10px 0;
     gap: 12px;
   }
 
@@ -1786,4 +1784,179 @@ textarea.form-control:focus {
     height: 30px;
     background-size: 15px 15px;
   }
+}
+
+/* ========================================
+   Banner Showcase (Manga Showcase Type)
+   ======================================== */
+.banner-showcase {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  background-color: #000;
+}
+
+.banner-showcase-bg {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 40px);
+  object-fit: cover;
+  object-position: center;
+  filter: blur(20px);
+  transform: scale(1.1);
+}
+
+.banner-showcase-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.4) 50%, rgba(0, 0, 0, 0.7) 100%);
+  z-index: 1;
+}
+
+.banner-showcase-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 60px;
+  gap: 40px;
+}
+
+.banner-showcase-cover {
+  flex-shrink: 0;
+}
+
+.banner-showcase-cover img {
+  width: 260px;
+  height: auto;
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+  aspect-ratio: 2 / 3;
+}
+
+.banner-showcase-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+}
+
+.banner-showcase-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffffff !important;
+  margin: 0;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.banner-showcase-author {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8) !important;
+  margin: 0;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+}
+
+.banner-showcase-description {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.7) !important;
+  margin: 8px 0 0 0;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.6);
+}
+
+.banner-showcase-btn {
+  margin-top: 16px;
+  width: fit-content;
+  padding: 10px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Responsive Showcase */
+@media (max-width: 768px) {
+  .banner-showcase {
+    height: 300px;
+  }
+
+  .banner-showcase-content {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .banner-showcase-cover img {
+    width: 130px;
+    max-height: 200px;
+  }
+
+  .banner-showcase-title {
+    font-size: 20px;
+  }
+
+  .banner-showcase-author {
+    font-size: 14px;
+  }
+
+  .banner-showcase-description {
+    font-size: 12px;
+    -webkit-line-clamp: 2;
+  }
+
+  .banner-showcase-btn {
+    padding: 8px 18px;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner-showcase-content {
+    padding: 15px;
+    gap: 14px;
+  }
+
+  .banner-showcase-cover img {
+    width: 100px;
+    max-height: 160px;
+  }
+
+  .banner-showcase-title {
+    font-size: 17px;
+  }
+
+  .banner-showcase-description {
+    display: none;
+  }
+}
+
+/* Light theme showcase overrides */
+[data-theme="light"] .banner-showcase-title {
+  color: #ffffff !important;
+}
+
+[data-theme="light"] .banner-showcase-author {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+[data-theme="light"] .banner-showcase-description {
+  color: rgba(255, 255, 255, 0.7) !important;
 }
