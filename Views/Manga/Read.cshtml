@@ -46,6 +46,7 @@
         .reader-container {
             width: 100vw;
             height: 100vh;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             position: relative;
@@ -645,29 +646,26 @@
             /* Back button: icon only on mobile */
             .header-left .reader-btn {
                 padding: 0;
-                width: 32px;
-                height: 32px;
+                width: 36px;
+                height: 36px;
                 justify-content: center;
                 border-radius: 6px;
             }
 
             .reader-btn {
-                height: 32px;
+                height: 36px;
                 padding: 0 10px;
                 font-size: 12px;
                 border-radius: 6px;
             }
 
-            /* Fullscreen button: icon only */
-            .header-right .reader-btn {
-                padding: 0;
-                width: 32px;
-                height: 32px;
-                justify-content: center;
+            /* Hide fullscreen button on mobile */
+            .header-right .reader-btn[onclick="toggleFullscreen()"] {
+                display: none;
             }
 
             .page-selector {
-                height: 32px;
+                height: 36px;
                 font-size: 12px;
                 padding: 0 22px 0 8px;
                 border-radius: 6px;
@@ -675,7 +673,7 @@
             }
 
             .page-selector#chapterSelector {
-                max-width: 110px;
+                max-width: 120px;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
@@ -693,32 +691,82 @@
                 display: none !important;
             }
 
+            /* Reading mode controls - moved to header-right via JS */
             .reading-mode-controls {
-                opacity: 1;
-                pointer-events: auto;
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                position: static;
+                background-color: transparent;
+                padding: 0;
+                border-radius: 0;
+                backdrop-filter: none;
+            }
+
+            .reading-mode-toggle {
+                width: 36px;
+                height: 36px;
+                border-radius: 6px;
+                background-color: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .reading-mode-toggle svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* Reading mode menu opens downward from header */
+            .reading-mode-menu {
+                top: 42px;
+                bottom: auto;
+                left: auto;
+                right: 0;
+                min-width: 200px;
+            }
+
+            .reading-mode-option {
+                min-height: 44px;
+                padding: 10px 12px;
+                font-size: 14px;
             }
 
             .header-center {
                 display: none;
             }
 
-            /* Footer */
+            /* Footer - fixed at bottom to avoid mobile viewport issues */
             .reader-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
                 padding: 10px 12px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            }
+
+            /* Reserve space for fixed footer */
+            .image-viewer {
+                margin-bottom: 60px;
             }
 
             .footer-controls .reader-btn {
-                height: 32px;
+                height: 38px;
                 padding: 0;
-                width: 32px;
+                width: 38px;
                 justify-content: center;
                 font-size: 12px;
             }
 
             .progress-bar-container {
                 flex: 1;
+                min-width: 0;
                 max-width: none;
-                margin: 0 10px;
+                margin: 0 8px;
+            }
+
+            .progress-bar-custom {
+                height: 8px;
+                border-radius: 4px;
             }
 
             .keyboard-hint {
@@ -1583,7 +1631,10 @@
                 document.getElementById('readerHeader').classList.add('hidden');
                 document.getElementById('readerFooter').classList.add('hidden');
                 document.getElementById('zoomControls').classList.remove('visible');
-                document.getElementById('readingModeControls').classList.remove('visible');
+                // Keep reading mode controls visible on mobile
+                if (!isMobile()) {
+                    document.getElementById('readingModeControls').classList.remove('visible');
+                }
             }
         }
 
@@ -1678,6 +1729,15 @@
 
         // Initialize reading mode from localStorage
         function initReadingMode() {
+            // On mobile, move reading mode controls into the header-right (replaces hidden fullscreen btn)
+            if (isMobile()) {
+                const rmControls = document.getElementById('readingModeControls');
+                const headerRight = document.querySelector('.header-right');
+                if (rmControls && headerRight) {
+                    headerRight.appendChild(rmControls);
+                }
+            }
+
             if (readingMode !== 'single') {
                 // Highlight the correct option
                 document.querySelectorAll('.reading-mode-option').forEach(opt => {
