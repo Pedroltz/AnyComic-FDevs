@@ -18,6 +18,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/x-icon" href="~/icon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <style>
         :root {
@@ -356,6 +357,130 @@
             text-align: center;
         }
 
+        /* Reading Mode Controls (floating, separate from zoom) */
+        .reading-mode-controls {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 90;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 6px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .reading-mode-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Reading Mode Toggle */
+        .reading-mode-wrapper {
+            position: relative;
+        }
+
+        .reading-mode-toggle {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .reading-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .reading-mode-menu {
+            display: none;
+            position: absolute;
+            top: 36px;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 4px;
+            min-width: 180px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .reading-mode-menu.open {
+            display: block;
+        }
+
+        .reading-mode-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .reading-mode-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        .reading-mode-option.active {
+            color: var(--primary-red);
+        }
+
+        .reading-mode-option svg {
+            flex-shrink: 0;
+        }
+
+        /* Dual Page Container */
+        .dual-page-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .dual-page-container.zoomed {
+            cursor: grab;
+        }
+
+        .dual-page-container.dragging {
+            cursor: grabbing;
+        }
+
+        .dual-page-container .manga-image {
+            max-width: 50%;
+            max-height: 100%;
+            object-fit: contain;
+            transform: none !important;
+        }
+
+        .dual-page-container.rtl-mode {
+            flex-direction: row-reverse;
+        }
+
         /* Fullscreen styles */
         .reader-container.is-fullscreen .reader-header,
         .reader-container.is-fullscreen .reader-footer {
@@ -383,6 +508,16 @@
 
         .reader-container.is-fullscreen .manga-image {
             max-width: 100vw;
+            max-height: 100vh;
+        }
+
+        .reader-container.is-fullscreen .dual-page-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .reader-container.is-fullscreen .dual-page-container .manga-image {
+            max-width: 50vw;
             max-height: 100vh;
         }
 
@@ -502,8 +637,16 @@
             }
 
             .nav-arrow {
-                width: 50px;
-                height: 70px;
+                display: none !important;
+            }
+
+            .zoom-controls {
+                display: none !important;
+            }
+
+            .reading-mode-controls {
+                opacity: 1;
+                pointer-events: auto;
             }
 
             .header-center {
@@ -604,6 +747,18 @@
                 </svg>
             </button>
 
+            <div class="dual-page-container" id="dualPageContainer" style="display:none;">
+                <img src="@Model.CaminhoImagem"
+                     alt="Page @Model.NumeroPagina"
+                     class="manga-image"
+                     id="mangaImageLeft"
+                     draggable="false">
+                <img src=""
+                     alt=""
+                     class="manga-image"
+                     id="mangaImageRight"
+                     draggable="false">
+            </div>
             <img src="@Model.CaminhoImagem"
                  alt="Page @Model.NumeroPagina"
                  class="manga-image"
@@ -627,6 +782,41 @@
                 <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
                 <span class="zoom-level-text" id="zoomLevelText">100%</span>
                 <button class="zoom-btn" onclick="resetZoom(); showZoomLevel();" title="Reset Zoom" style="font-size: 12px;">1:1</button>
+            </div>
+
+            <!-- Reading Mode Toggle (separate from zoom, visible on mobile) -->
+            <div class="reading-mode-controls" id="readingModeControls">
+                <div class="reading-mode-wrapper">
+                    <button class="reading-mode-toggle" id="readingModeToggle" onclick="toggleReadingModeMenu(event)" title="Reading Mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                        </svg>
+                    </button>
+                    <div class="reading-mode-menu" id="readingModeMenu">
+                        <button class="reading-mode-option active" data-mode="single" onclick="setReadingMode('single')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="4" y="1" width="8" height="14" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1.2"/>
+                            </svg>
+                            Single Page
+                        </button>
+                        <button class="reading-mode-option" data-mode="double-ltr" onclick="setReadingMode('double-ltr')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="1" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <rect x="9" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <path d="M5 8l2 0M5 7l2 1-2 1z" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                            Double (L→R)
+                        </button>
+                        <button class="reading-mode-option" data-mode="double-rtl" onclick="setReadingMode('double-rtl')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="1" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <rect x="9" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <path d="M11 8l-2 0M11 7l-2 1 2 1z" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                            Double (R→L)
+                        </button>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -693,6 +883,138 @@
 
         let pendingChapterNav = null;
 
+        function isMobile() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
+
+        // ===== READING MODE =====
+        let readingMode = localStorage.getItem('readingMode') || 'single';
+
+        const dualContainer = document.getElementById('dualPageContainer');
+        const imgLeft = document.getElementById('mangaImageLeft');
+        const imgRight = document.getElementById('mangaImageRight');
+
+        function toggleReadingModeMenu(e) {
+            e.stopPropagation();
+            document.getElementById('readingModeMenu').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('readingModeMenu');
+            if (menu && !e.target.closest('.reading-mode-wrapper')) {
+                menu.classList.remove('open');
+            }
+        });
+
+        function setReadingMode(mode) {
+            readingMode = mode;
+            localStorage.setItem('readingMode', mode);
+
+            // Update active state in menu
+            document.querySelectorAll('.reading-mode-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.mode === mode);
+            });
+
+            document.getElementById('readingModeMenu').classList.remove('open');
+
+            // Reset zoom before switching
+            resetZoom();
+
+            // Re-render current view
+            updateDualPageDisplay();
+        }
+
+        function getPageStep() {
+            if (readingMode === 'single') return 1;
+            // In double mode, if we're on the last page and it's odd, step is still 1
+            // Otherwise step 2
+            return 2;
+        }
+
+        function getAlignedPage(pageNum) {
+            // In double mode, pages are shown in pairs: 1-2, 3-4, 5-6...
+            // Always align to odd page as the "base"
+            if (readingMode === 'single') return pageNum;
+            return pageNum % 2 === 0 ? pageNum - 1 : pageNum;
+        }
+
+        function updateDualPageDisplay() {
+            if (readingMode === 'single') {
+                // Single mode: show single image, hide dual container
+                dualContainer.style.display = 'none';
+                img.style.display = '';
+                return;
+            }
+
+            // Double mode
+            const alignedPage = getAlignedPage(currentPage);
+            currentPage = alignedPage;
+
+            const firstPageInfo = pageMap.find(p => p.pagina === alignedPage);
+            const secondPageInfo = pageMap.find(p => p.pagina === alignedPage + 1);
+
+            if (!firstPageInfo) return;
+
+            // Hide single image, show dual container
+            img.style.display = 'none';
+            dualContainer.style.display = 'flex';
+
+            // Set RTL mode
+            dualContainer.classList.toggle('rtl-mode', readingMode === 'double-rtl');
+
+            // Load images
+            imgLeft.src = firstPageInfo.imagem;
+            imgLeft.alt = 'Page ' + alignedPage;
+
+            if (secondPageInfo) {
+                imgRight.src = secondPageInfo.imagem;
+                imgRight.alt = 'Page ' + (alignedPage + 1);
+                imgRight.style.display = '';
+            } else {
+                // Last page is alone (odd total)
+                imgRight.style.display = 'none';
+            }
+
+            // Track loading
+            let loadCount = 0;
+            const needed = secondPageInfo ? 2 : 1;
+            showLoading();
+            const onLoaded = () => {
+                loadCount++;
+                if (loadCount >= needed) hideLoading();
+            };
+            imgLeft.onload = onLoaded;
+            if (secondPageInfo) imgRight.onload = onLoaded;
+
+            // Update UI elements
+            updatePageUI();
+        }
+
+        function updatePageUI() {
+            const counter = document.querySelector('.page-counter');
+            if (readingMode !== 'single') {
+                const secondPage = currentPage + 1 <= totalPages ? currentPage + 1 : null;
+                const pageText = secondPage
+                    ? 'Pages ' + currentPage + '-' + secondPage + ' of ' + totalPages
+                    : 'Page ' + currentPage + ' of ' + totalPages;
+                if (counter) counter.textContent = currentChapterName + ' - ' + pageText;
+                document.title = mangaTitle + ' - Pages ' + currentPage + (secondPage ? '-' + secondPage : '');
+            } else {
+                if (counter) counter.textContent = currentChapterName + ' - Page ' + currentPage + ' of ' + totalPages;
+                document.title = mangaTitle + ' - Page ' + currentPage;
+            }
+
+            document.getElementById('pageSelector').value = currentPage;
+
+            const progressPercent = (currentPage * 100.0 / totalPages);
+            document.querySelector('.progress-bar-fill').style.width = progressPercent.toFixed(2) + '%';
+
+            const newUrl = readBaseUrl + '?id=' + mangaId +
+                '&capituloNumero=' + currentChapterNum +
+                '&pagina=' + currentPage;
+            history.replaceState(null, '', newUrl);
+        }
+
         // ===== ZOOM & PAN SYSTEM =====
         const img = document.getElementById('mangaImage');
         const viewer = document.getElementById('imageViewer');
@@ -730,10 +1052,35 @@
         const zoomSlider = document.getElementById('zoomSlider');
         const zoomLevelText = document.getElementById('zoomLevelText');
 
+        function getZoomTarget() {
+            return readingMode === 'single' ? img : dualContainer;
+        }
+
         function getImageLayout() {
             const viewerRect = viewer.getBoundingClientRect();
             const viewerW = viewerRect.width;
             const viewerH = viewerRect.height;
+
+            if (readingMode !== 'single' && dualContainer.style.display !== 'none') {
+                // Dual mode: calculate the actual rendered area of both images combined
+                const leftRect = imgLeft.getBoundingClientRect();
+                const rightVisible = imgRight.style.display !== 'none';
+                const rightRect = rightVisible ? imgRight.getBoundingClientRect() : null;
+
+                // Total content area (both images side by side)
+                const contentLeft = leftRect.left;
+                const contentRight = rightVisible ? rightRect.right : leftRect.right;
+                const contentTop = Math.min(leftRect.top, rightVisible ? rightRect.top : leftRect.top);
+                const contentBottom = Math.max(leftRect.bottom, rightVisible ? rightRect.bottom : leftRect.bottom);
+
+                const displayW = (contentRight - contentLeft) / scale;
+                const displayH = (contentBottom - contentTop) / scale;
+                const offsetX = (contentLeft - viewerRect.left - panX) / scale;
+                const offsetY = (contentTop - viewerRect.top - panY) / scale;
+
+                return { viewerW, viewerH, displayW, displayH, offsetX, offsetY };
+            }
+
             const imgW = img.naturalWidth || img.offsetWidth;
             const imgH = img.naturalHeight || img.offsetHeight;
             const ratio = Math.min(viewerW / imgW, viewerH / imgH);
@@ -746,11 +1093,12 @@
         }
 
         function applyTransform() {
-            img.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            const target = getZoomTarget();
+            target.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
             if (scale > 1) {
-                img.classList.add('zoomed');
+                target.classList.add('zoomed');
             } else {
-                img.classList.remove('zoomed');
+                target.classList.remove('zoomed');
             }
         }
 
@@ -820,6 +1168,11 @@
             scale = 1;
             panX = 0;
             panY = 0;
+            // Clear transform on both targets
+            img.style.transform = '';
+            img.classList.remove('zoomed');
+            dualContainer.style.transform = '';
+            dualContainer.classList.remove('zoomed');
             applyTransform();
             updateZoomUI();
         }
@@ -844,7 +1197,8 @@
         }, { passive: false });
 
         // --- Mouse double-click to toggle zoom ---
-        img.addEventListener('dblclick', function(e) {
+        viewer.addEventListener('dblclick', function(e) {
+            if (e.target.closest('.zoom-controls') || e.target.closest('.nav-arrow') || e.target.closest('.reading-mode-wrapper')) return;
             e.preventDefault();
             if (scale > 1) {
                 resetZoom();
@@ -855,7 +1209,8 @@
         });
 
         // --- Mouse drag to pan ---
-        img.addEventListener('mousedown', function(e) {
+        viewer.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.zoom-controls') || e.target.closest('.nav-arrow') || e.target.closest('.reading-mode-wrapper')) return;
             if (scale <= 1) return;
             e.preventDefault();
             isDragging = true;
@@ -863,7 +1218,7 @@
             dragStartY = e.clientY;
             dragStartPanX = panX;
             dragStartPanY = panY;
-            img.classList.add('dragging');
+            getZoomTarget().classList.add('dragging');
         });
 
         document.addEventListener('mousemove', function(e) {
@@ -877,7 +1232,7 @@
         document.addEventListener('mouseup', function() {
             if (isDragging) {
                 isDragging = false;
-                img.classList.remove('dragging');
+                getZoomTarget().classList.remove('dragging');
             }
         });
 
@@ -908,9 +1263,9 @@
                 touchMoved = false;
                 const touch = e.touches[0];
 
-                // Double-tap detection
+                // Double-tap detection (desktop/tablet only, not mobile)
                 const now = Date.now();
-                if (now - lastTapTime < 300) {
+                if (!isMobile() && now - lastTapTime < 300) {
                     e.preventDefault();
                     if (scale > 1) {
                         resetZoom();
@@ -931,7 +1286,7 @@
                     touchStartY = touch.clientY;
                     touchStartPanX = panX;
                     touchStartPanY = panY;
-                    img.classList.add('dragging');
+                    getZoomTarget().classList.add('dragging');
                 }
             }
         }, { passive: false });
@@ -975,7 +1330,7 @@
             }
             if (e.touches.length === 0) {
                 touchDragging = false;
-                img.classList.remove('dragging');
+                getZoomTarget().classList.remove('dragging');
             }
         });
 
@@ -1017,8 +1372,10 @@
         // ===== PAGE NAVIGATION =====
         function previousPage() {
             if (scale > 1) { resetZoom(); }
+            const step = getPageStep();
             if (currentPage > 1) {
-                navigateToPage(currentPage - 1);
+                const targetPage = Math.max(1, currentPage - step);
+                navigateToPage(targetPage);
             } else if (hasPrevChapter) {
                 showChapterModal('prev');
             }
@@ -1026,15 +1383,19 @@
 
         function nextPage() {
             if (scale > 1) { resetZoom(); }
-            if (currentPage < totalPages) {
-                navigateToPage(currentPage + 1);
+            const step = getPageStep();
+            // In dual mode, check if we're past the last viewable pair
+            const effectiveEnd = readingMode === 'single' ? currentPage : currentPage + (currentPage + 1 <= totalPages ? 1 : 0);
+            if (effectiveEnd < totalPages) {
+                navigateToPage(currentPage + step);
             } else if (hasNextChapter) {
                 showChapterModal('next');
             }
         }
 
         function jumpToPage(pageNum) {
-            navigateToPage(parseInt(pageNum));
+            const page = parseInt(pageNum);
+            navigateToPage(readingMode !== 'single' ? getAlignedPage(page) : page);
         }
 
         function changeChapter(capituloNumero) {
@@ -1051,35 +1412,21 @@
             // Reset zoom
             if (scale > 1) resetZoom();
 
-            // Show loading spinner (hidden by img onload)
-            showLoading();
-
-            // Swap image source (triggers onload -> hideLoading)
-            img.src = pageInfo.imagem;
-            img.alt = 'Page ' + pageNum;
-
             // Update current page
             currentPage = pageNum;
 
-            // Update header page counter
-            const counter = document.querySelector('.page-counter');
-            if (counter) counter.textContent = currentChapterName + ' - Page ' + currentPage + ' of ' + totalPages;
+            if (readingMode !== 'single') {
+                updateDualPageDisplay();
+            } else {
+                // Show loading spinner (hidden by img onload)
+                showLoading();
 
-            // Update page selector dropdown
-            document.getElementById('pageSelector').value = currentPage;
+                // Swap image source (triggers onload -> hideLoading)
+                img.src = pageInfo.imagem;
+                img.alt = 'Page ' + pageNum;
 
-            // Update progress bar
-            const progressPercent = (currentPage * 100.0 / totalPages);
-            document.querySelector('.progress-bar-fill').style.width = progressPercent.toFixed(2) + '%';
-
-            // Update document title
-            document.title = mangaTitle + ' - Page ' + currentPage;
-
-            // Update URL without reload (preserves fullscreen)
-            const newUrl = readBaseUrl + '?id=' + mangaId +
-                '&capituloNumero=' + currentChapterNum +
-                '&pagina=' + currentPage;
-            history.replaceState(null, '', newUrl);
+                updatePageUI();
+            }
 
             // Preload adjacent pages
             preloadAdjacentPages();
@@ -1165,6 +1512,7 @@
             document.getElementById('readerHeader').classList.remove('hidden');
             document.getElementById('readerFooter').classList.remove('hidden');
             document.getElementById('zoomControls').classList.add('visible');
+            document.getElementById('readingModeControls').classList.add('visible');
         }
 
         function hideControls() {
@@ -1172,6 +1520,7 @@
                 document.getElementById('readerHeader').classList.add('hidden');
                 document.getElementById('readerFooter').classList.add('hidden');
                 document.getElementById('zoomControls').classList.remove('visible');
+                document.getElementById('readingModeControls').classList.remove('visible');
             }
         }
 
@@ -1187,25 +1536,95 @@
             }
         });
 
-        // Preload adjacent page images for faster client-side navigation
-        function preloadAdjacentPages() {
-            // Preload next page image
-            if (currentPage < totalPages) {
-                const nextInfo = pageMap.find(p => p.pagina === currentPage + 1);
-                if (nextInfo) {
-                    const preloadNext = new Image();
-                    preloadNext.src = nextInfo.imagem;
+        // ===== MOBILE: SWIPE & TAP NAVIGATION =====
+
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeStartTime = 0;
+        let swipeMoved = false;
+
+        viewer.addEventListener('touchstart', function(e) {
+            if (!isMobile() || e.touches.length !== 1 || scale > 1) return;
+            swipeStartX = e.touches[0].clientX;
+            swipeStartY = e.touches[0].clientY;
+            swipeStartTime = Date.now();
+            swipeMoved = false;
+        }, { passive: true });
+
+        viewer.addEventListener('touchmove', function(e) {
+            if (!isMobile() || scale > 1) return;
+            const dx = Math.abs(e.touches[0].clientX - swipeStartX);
+            const dy = Math.abs(e.touches[0].clientY - swipeStartY);
+            if (dx > 10 || dy > 10) swipeMoved = true;
+        }, { passive: true });
+
+        viewer.addEventListener('touchend', function(e) {
+            if (!isMobile() || scale > 1) return;
+
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const dx = endX - swipeStartX;
+            const dy = endY - swipeStartY;
+            const elapsed = Date.now() - swipeStartTime;
+
+            // Swipe detection: horizontal > 50px, faster than 300ms, more horizontal than vertical
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && elapsed < 400) {
+                if (dx < 0) {
+                    nextPage();
+                } else {
+                    previousPage();
+                }
+                return;
+            }
+
+            // Tap detection: no significant movement, short press
+            if (!swipeMoved && elapsed < 300) {
+                const viewerRect = viewer.getBoundingClientRect();
+                const tapX = endX - viewerRect.left;
+                const viewerWidth = viewerRect.width;
+
+                // Tap right half = next, left half = previous
+                if (tapX > viewerWidth * 0.5) {
+                    nextPage();
+                } else {
+                    previousPage();
                 }
             }
-            // Preload previous page image
-            if (currentPage > 1) {
-                const prevInfo = pageMap.find(p => p.pagina === currentPage - 1);
-                if (prevInfo) {
-                    const preloadPrev = new Image();
-                    preloadPrev.src = prevInfo.imagem;
+        }, { passive: true });
+
+        // Preload adjacent page images for faster client-side navigation
+        function preloadAdjacentPages() {
+            const step = getPageStep();
+            // Preload next pages
+            for (let i = 1; i <= step + 1; i++) {
+                const p = currentPage + i;
+                if (p <= totalPages) {
+                    const info = pageMap.find(pg => pg.pagina === p);
+                    if (info) { const pre = new Image(); pre.src = info.imagem; }
+                }
+            }
+            // Preload previous pages
+            for (let i = 1; i <= step; i++) {
+                const p = currentPage - i;
+                if (p >= 1) {
+                    const info = pageMap.find(pg => pg.pagina === p);
+                    if (info) { const pre = new Image(); pre.src = info.imagem; }
                 }
             }
         }
+
+        // Initialize reading mode from localStorage
+        function initReadingMode() {
+            if (readingMode !== 'single') {
+                // Highlight the correct option
+                document.querySelectorAll('.reading-mode-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.mode === readingMode);
+                });
+                updateDualPageDisplay();
+            }
+        }
+
+        initReadingMode();
         // Initial preload
         preloadAdjacentPages();
     </script>
