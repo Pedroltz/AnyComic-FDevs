@@ -184,9 +184,9 @@
         }
     }
 
-    /* Form controls dark mode support */
-    [data-theme="dark"] .form-control:focus,
-    [data-theme="dark"] .form-select:focus {
+    /* Form controls focus */
+    .form-control:focus,
+    .form-select:focus {
         background-color: var(--bg-primary);
         color: var(--text-primary);
         border-color: #007bff;
@@ -194,52 +194,21 @@
 
     /* Custom dropdown styling */
     .dropdown-menu {
-        background-color: var(--bg-secondary) !important;
-        border: 1px solid var(--border-color) !important;
-    }
-
-    .dropdown-item {
-        color: var(--text-primary) !important;
-        padding: 8px 16px;
-        transition: background-color 0.2s ease;
-    }
-
-    .dropdown-item:hover,
-    .dropdown-item:focus {
-        background-color: rgba(128, 128, 128, 0.2) !important;
-        color: var(--text-primary) !important;
-    }
-
-    [data-theme="dark"] .dropdown-menu {
         background-color: #1a1a1a !important;
         border: 1px solid #333 !important;
     }
 
-    [data-theme="dark"] .dropdown-item {
+    .dropdown-item {
         color: #ffffff !important;
+        padding: 8px 16px;
+        transition: background-color 0.2s ease;
         background-color: transparent;
     }
 
-    [data-theme="dark"] .dropdown-item:hover,
-    [data-theme="dark"] .dropdown-item:focus {
+    .dropdown-item:hover,
+    .dropdown-item:focus {
         background-color: rgba(128, 128, 128, 0.3) !important;
         color: #ffffff !important;
-    }
-
-    /* Light mode dropdown */
-    [data-theme="light"] .dropdown-menu {
-        background-color: #ffffff !important;
-        border: 1px solid #dee2e6 !important;
-    }
-
-    [data-theme="light"] .dropdown-item {
-        color: #212529 !important;
-    }
-
-    [data-theme="light"] .dropdown-item:hover,
-    [data-theme="light"] .dropdown-item:focus {
-        background-color: #f8f9fa !important;
-        color: #212529 !important;
     }
 </style>
 

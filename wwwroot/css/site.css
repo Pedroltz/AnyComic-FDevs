@@ -49,412 +49,8 @@ body {
   --card-hover: #252525;
 }
 
-/* Light Theme Variables */
-[data-theme="light"] {
-  --primary-red: #e63946;
-  --primary-red-dark: #c5303b;
-  --primary-red-light: #ff4d5a;
-  --text-primary: #212529;
-  --text-secondary: #6c757d;
-  --text-muted: #999999;
-  --bg-dark: #ffffff;
-  --bg-darker: #f8f9fa;
-  --bg-light: #f8f9fa;
-  --border-color: #dee2e6;
-  --hover-transition: 0.3s ease;
-  --card-bg: #ffffff;
-  --card-hover: #f8f9fa;
-}
-
-[data-theme="light"] body {
-  background-color: #f8f9fa;
-  color: #212529;
-}
-
-[data-theme="light"] .navbar {
-  background-color: #ffffff !important;
-  border-bottom: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .navbar-toggler-icon {
-  filter: invert(1);
-}
-
-[data-theme="light"] .dropdown-menu {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .dropdown-item {
-  color: #212529;
-}
-
-[data-theme="light"] .dropdown-item:hover {
-  background-color: #f8f9fa;
-}
-
-[data-theme="light"] .manga-card {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .manga-card:hover {
-  border-color: var(--primary-red);
-  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.15);
-}
-
-[data-theme="light"] .page-header,
-[data-theme="light"] .manga-details,
-[data-theme="light"] .modal-content,
-[data-theme="light"] .admin-panel {
-  background-color: #ffffff;
-  border-color: #dee2e6;
-}
-
-[data-theme="light"] .footer {
-  background-color: #ffffff;
-  border-top: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .form-control,
-[data-theme="light"] .form-select {
-  background-color: #ffffff;
-  border-color: #ced4da;
-  color: #212529;
-}
-
-[data-theme="light"] .form-control:focus,
-[data-theme="light"] .form-select:focus {
-  background-color: #ffffff;
-  border-color: var(--primary-red);
-}
-
-[data-theme="light"] .alert-info {
-  background-color: #d1ecf1;
-  border-color: #bee5eb;
-  color: #0c5460;
-}
-
-[data-theme="light"] .banner-container {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="light"] .navbar-brand {
-  color: var(--primary-red) !important;
-}
-
-[data-theme="light"] .navbar-brand:hover {
-  color: var(--primary-red-dark) !important;
-}
-
-[data-theme="light"] .nav-link {
-  color: #333 !important;
-}
-
-[data-theme="light"] .nav-link:hover {
-  color: var(--primary-red) !important;
-}
-
-[data-theme="light"] .manga-card-title,
-[data-theme="light"] h1,
-[data-theme="light"] h2,
-[data-theme="light"] h3,
-[data-theme="light"] h4,
-[data-theme="light"] h5,
-[data-theme="light"] h6 {
-  color: #333 !important;
-}
-
-[data-theme="light"] .manga-card-author,
-[data-theme="light"] .page-subtitle {
-  color: #6c757d !important;
-}
-
-[data-theme="light"] .manga-details {
-  background-color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .manga-details-title {
-  color: #333 !important;
-}
-
-[data-theme="light"] .manga-details-author {
-  color: #6c757d !important;
-}
-
-[data-theme="light"] .manga-details-description {
-  color: #495057 !important;
-}
-
-/* Override inline styles in manga details for light theme */
-[data-theme="light"] .col-md-6 div[style*="background-color: #2a2a2a"] {
-  background-color: #f8f9fa !important;
-  border: 1px solid #dee2e6 !important;
-}
-
-[data-theme="light"] .col-md-6 div[style*="background-color: #2a2a2a"] p[style*="color: #b0b0b0"] {
-  color: #6c757d !important;
-}
-
-[data-theme="light"] .col-md-6 div[style*="background-color: #2a2a2a"] p[style*="color: #f0f0f0"] {
-  color: #333 !important;
-}
-
-[data-theme="light"] .manga-details-cover[style*="background-color: #2a2a2a"] {
-  background-color: #f8f9fa !important;
-}
-
-[data-theme="light"] .navbar-toggler-icon {
-  filter: none !important;
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%23e63946' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-}
-
-[data-theme="light"] .navbar-toggler {
-  border-color: var(--primary-red) !important;
-}
-
-/* Light Theme Mobile Menu */
 @media (max-width: 991px) {
-  [data-theme="light"] .navbar-collapse {
-    background-color: #ffffff;
-    border: 1px solid #dee2e6;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
 
-  [data-theme="light"] .nav-link:hover {
-    background-color: #f8f9fa;
-  }
-
-  [data-theme="light"] .navbar-nav.ms-auto {
-    border-top: 1px solid #dee2e6;
-  }
-
-  [data-theme="light"] .dropdown-menu {
-    background-color: #f8f9fa;
-  }
-
-  [data-theme="light"] .dropdown-item:hover {
-    background-color: #e9ecef;
-  }
-}
-
-/* Remove any blue colors from Bootstrap defaults in light mode */
-[data-theme="light"] .btn-primary {
-  background-color: var(--primary-red) !important;
-  border-color: var(--primary-red) !important;
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .btn-primary:hover,
-[data-theme="light"] .btn-primary:focus,
-[data-theme="light"] .btn-primary:active {
-  background-color: var(--primary-red-dark) !important;
-  border-color: var(--primary-red-dark) !important;
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .btn-primary svg {
-  fill: #ffffff !important;
-}
-
-[data-theme="light"] .btn-outline-primary {
-  color: var(--primary-red) !important;
-  border-color: var(--primary-red) !important;
-}
-
-[data-theme="light"] .btn-outline-primary:hover,
-[data-theme="light"] .btn-outline-primary:focus,
-[data-theme="light"] .btn-outline-primary:active {
-  background-color: var(--primary-red) !important;
-  border-color: var(--primary-red) !important;
-  color: white !important;
-}
-
-[data-theme="light"] a {
-  color: var(--primary-red) !important;
-}
-
-[data-theme="light"] a:hover {
-  color: var(--primary-red-dark) !important;
-}
-
-[data-theme="light"] .alert-info {
-  background-color: #d1ecf1 !important;
-  border-color: #bee5eb !important;
-  color: #0c5460 !important;
-}
-
-[data-theme="light"] .alert-danger {
-  background-color: #f8d7da !important;
-  border-color: #f5c6cb !important;
-  color: #721c24 !important;
-}
-
-[data-theme="light"] .admin-table {
-  background-color: #ffffff;
-}
-
-[data-theme="light"] .admin-table thead {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #dee2e6;
-}
-
-[data-theme="light"] .admin-table tbody tr {
-  border-bottom: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .admin-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-[data-theme="light"] .page-header {
-  background-color: transparent;
-}
-
-[data-theme="light"] .page-title {
-  color: #333 !important;
-}
-
-[data-theme="light"] .carousel-caption-custom h2,
-[data-theme="light"] .carousel-caption-custom p {
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .banner-title {
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .banner-subtitle {
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .form-text {
-  color: #6c757d !important;
-}
-
-[data-theme="light"] .form-label {
-  color: #333 !important;
-}
-
-[data-theme="light"] .form-check-label {
-  color: #333 !important;
-}
-
-[data-theme="light"] .card {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .card-body {
-  background-color: #ffffff;
-  color: #212529;
-}
-
-[data-theme="light"] .card-title {
-  color: #333 !important;
-}
-
-[data-theme="light"] .list-group-item {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-  color: #212529;
-}
-
-[data-theme="light"] .list-group-item:hover {
-  background-color: #f8f9fa;
-}
-
-[data-theme="light"] p,
-[data-theme="light"] span:not(.badge),
-[data-theme="light"] div:not(.alert):not(.btn):not(.badge) {
-  color: #495057;
-}
-
-[data-theme="light"] label {
-  color: #333 !important;
-}
-
-[data-theme="light"] .modal-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .modal-body {
-  background-color: #ffffff;
-}
-
-[data-theme="light"] .modal-title {
-  color: #333 !important;
-}
-
-[data-theme="light"] .bg-secondary {
-  background-color: #6c757d !important;
-}
-
-[data-theme="light"] .text-white {
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .text-center h4,
-[data-theme="light"] .text-center p {
-  color: inherit;
-}
-
-[data-theme="light"] .alert p {
-  color: inherit !important;
-}
-
-[data-theme="light"] .alert h4 {
-  color: inherit !important;
-}
-
-/* Override Bootstrap focus states to use red */
-[data-theme="light"] .form-control:focus,
-[data-theme="light"] .form-select:focus,
-[data-theme="light"] .form-check-input:focus {
-  border-color: var(--primary-red) !important;
-  box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.25) !important;
-}
-
-[data-theme="light"] .form-check-input:checked {
-  background-color: var(--primary-red) !important;
-  border-color: var(--primary-red) !important;
-}
-
-/* Remove any Bootstrap blue focus rings */
-[data-theme="light"] *:focus {
-  outline: none !important;
-}
-
-[data-theme="light"] *:focus-visible {
-  outline: 2px solid var(--primary-red) !important;
-  outline-offset: 2px;
-}
-
-/* Dropdown hover in light theme */
-[data-theme="light"] .dropdown-item:hover,
-[data-theme="light"] .dropdown-item:focus {
-  background-color: #f8f9fa;
-  color: var(--primary-red) !important;
-}
-
-[data-theme="light"] .dropdown-item:active {
-  background-color: var(--primary-red);
-  color: white !important;
-}
-
-/* Carousel controls in light mode */
-[data-theme="light"] .carousel-control-prev-icon,
-[data-theme="light"] .carousel-control-next-icon {
-  filter: invert(1);
-}
-
-/* Ensure nav-link active state uses red */
-[data-theme="light"] .nav-link.active {
-  color: var(--primary-red) !important;
 }
 
 /* ========================================
@@ -558,15 +154,6 @@ h1, h2, h3, h4, h5, h6 {
     padding-left: 15px;
   }
 
-  #themeToggle {
-    width: 100%;
-    margin: 10px 0 !important;
-    justify-content: center;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
   .navbar-nav.ms-auto {
     margin-top: 10px;
     padding-top: 10px;
@@ -601,15 +188,6 @@ h1, h2, h3, h4, h5, h6 {
     margin-left: 10px;
   }
 
-  /* Show theme toggle text on mobile */
-  .theme-toggle-text {
-    display: inline !important;
-  }
-}
-
-/* Hide theme toggle text on desktop */
-.theme-toggle-text {
-  display: none;
 }
 
 .navbar-brand {
@@ -919,26 +497,6 @@ main {
   text-decoration: none;
 }
 
-[data-theme="light"] .section-icon {
-  background: rgba(239, 44, 47, 0.08);
-}
-
-[data-theme="light"] .section-icon-fire {
-  background: linear-gradient(135deg, rgba(239, 44, 47, 0.1), rgba(255, 120, 50, 0.06));
-}
-
-[data-theme="light"] .section-title {
-  color: #222;
-}
-
-[data-theme="light"] .section-subtitle {
-  color: #888;
-}
-
-[data-theme="light"] .section-view-all {
-  border-color: rgba(239, 44, 47, 0.25);
-}
-
 @media (max-width: 768px) {
   .page-container {
     padding: 20px 14px 14px;
@@ -1212,7 +770,6 @@ textarea.form-control:focus {
   font-size: 14px;
 }
 
-
 /* ========================================
    Newest Manga Row (Horizontal Scroll)
    ======================================== */
@@ -1279,17 +836,6 @@ textarea.form-control:focus {
 
 .newest-arrow-right {
   right: -52px;
-}
-
-[data-theme="light"] .newest-arrow {
-  background: var(--bg-darker);
-  border-color: var(--primary-red);
-  color: var(--primary-red);
-}
-
-[data-theme="light"] .newest-arrow:hover {
-  background: var(--primary-red);
-  color: #fff;
 }
 
 .newest-card-link {
@@ -1428,34 +974,9 @@ textarea.form-control:focus {
     right: 4px;
   }
 
-  [data-theme="light"] .newest-arrow {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-  }
 }
 
 /* Light theme overrides for newest section */
-[data-theme="light"] .newest-card {
-  background-color: #ffffff;
-  border: 1px solid #dee2e6;
-}
-
-[data-theme="light"] .newest-card:hover {
-  border-color: var(--primary-red);
-  box-shadow: 0 6px 20px rgba(230, 57, 70, 0.15);
-}
-
-[data-theme="light"] .newest-card-title {
-  color: #333 !important;
-}
-
-[data-theme="light"] .newest-card-author {
-  color: #6c757d !important;
-}
-
-[data-theme="light"] .section-title {
-  color: #333 !important;
-}
 
 /* ========================================
    Details Page Styles
@@ -1816,24 +1337,6 @@ textarea.form-control:focus {
 }
 
 /* Light theme Details overrides */
-[data-theme="light"] .details-hero {
-  background-color: #eee;
-}
-
-[data-theme="light"] .details-hero-bg {
-  filter: blur(24px) brightness(0.6);
-}
-
-[data-theme="light"] .details-stats {
-  background: #fff;
-  border-color: #e0e0e0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-}
-
-[data-theme="light"] .details-chapter-count {
-  background: #f8f8f8;
-  border-color: #e0e0e0;
-}
 
 .manga-details {
   background: var(--card-bg);
@@ -2002,26 +1505,6 @@ textarea.form-control:focus {
 }
 
 /* Light theme chapter list */
-[data-theme="light"] .chapter-list {
-  background-color: #ffffff;
-  border-color: #dee2e6;
-}
-
-[data-theme="light"] .chapter-item {
-  border-color: #eee;
-}
-
-[data-theme="light"] .chapter-item:hover {
-  background: linear-gradient(90deg, rgba(239, 44, 47, 0.04) 0%, transparent 100%);
-}
-
-[data-theme="light"] .chapter-name {
-  color: #333 !important;
-}
-
-[data-theme="light"] .chapter-meta small {
-  color: #999 !important;
-}
 
 /* ========================================
    Reader Page Styles
@@ -2493,17 +1976,6 @@ textarea.form-control:focus {
 }
 
 /* Light theme showcase overrides */
-[data-theme="light"] .banner-showcase-title {
-  color: #ffffff !important;
-}
-
-[data-theme="light"] .banner-showcase-author {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-[data-theme="light"] .banner-showcase-description {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
 
 /* ========================================
    Mobile Bottom Navigation
@@ -2539,12 +2011,6 @@ textarea.form-control:focus {
     box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.4);
   }
 
-  [data-theme="light"] .mobile-bottom-nav {
-    background-color: #ffffff;
-    border-top-color: #e0e0e0;
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
-  }
-
   .mobile-nav-item {
     display: flex;
     flex-direction: column;
@@ -2575,19 +2041,6 @@ textarea.form-control:focus {
   }
 
   .mobile-nav-item.active {
-    color: #ef2c2f;
-  }
-
-  [data-theme="light"] .mobile-nav-item {
-    color: #999;
-  }
-
-  [data-theme="light"] .mobile-nav-item:hover,
-  [data-theme="light"] .mobile-nav-item:focus {
-    color: #333;
-  }
-
-  [data-theme="light"] .mobile-nav-item.active {
     color: #ef2c2f;
   }
 
@@ -2635,12 +2088,6 @@ textarea.form-control:focus {
   animation: slideUpMenu 0.2s ease-out;
 }
 
-[data-theme="light"] .mobile-profile-menu-content {
-  background-color: #ffffff;
-  border-color: #e0e0e0;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
-}
-
 @keyframes slideUpMenu {
   from {
     opacity: 0;
@@ -2661,11 +2108,6 @@ textarea.form-control:focus {
   font-size: 15px;
   font-weight: 600;
   color: var(--text-primary, #e0e0e0);
-}
-
-[data-theme="light"] .mobile-profile-header {
-  color: #333;
-  border-bottom-color: #e0e0e0;
 }
 
 .mobile-profile-actions {
@@ -2694,15 +2136,6 @@ textarea.form-control:focus {
   color: var(--text-primary, #e0e0e0);
 }
 
-[data-theme="light"] .mobile-profile-action {
-  color: #333;
-}
-
-[data-theme="light"] .mobile-profile-action:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-  color: #333;
-}
-
 .mobile-profile-action-danger {
   color: #ef2c2f;
 }
@@ -2710,13 +2143,4 @@ textarea.form-control:focus {
 .mobile-profile-action-danger:hover {
   color: #ef2c2f;
   background-color: rgba(239, 44, 47, 0.08);
-}
-
-[data-theme="light"] .mobile-profile-action-danger {
-  color: #ef2c2f;
-}
-
-[data-theme="light"] .mobile-profile-action-danger:hover {
-  color: #ef2c2f;
-  background-color: rgba(239, 44, 47, 0.06);
 }
