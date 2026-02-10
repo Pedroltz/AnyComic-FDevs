@@ -283,11 +283,11 @@ namespace AnyComic.Services
                 var ogImage = htmlDoc.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
                 if (ogImage != null)
                 {
-                    return ogImage.GetAttributeValue("content", null);
+                    return ogImage.GetAttributeValue("content", null!);
                 }
             }
 
-            return coverNode?.GetAttributeValue("src", null);
+            return coverNode?.GetAttributeValue("src", null!);
         }
 
         private List<ChapterInfo> ExtractChapterList(HtmlDocument htmlDoc)

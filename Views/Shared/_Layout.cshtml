@@ -27,6 +27,12 @@
                         <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Manga" asp-action="Index">Manga</a>
                         </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Manga" asp-action="Favoritos">Favorites</a>
+                            </li>
+                        }
                     </ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
@@ -44,9 +50,6 @@
                                     @User.Identity.Name
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <li>
-                                        <a class="dropdown-item" asp-area="" asp-controller="Manga" asp-action="Favoritos">Favorite List</a>
-                                    </li>
                                     @if (User.Claims.Any(c => c.Type == "IsAdmin" && c.Value == "True"))
                                     {
                                         <li>

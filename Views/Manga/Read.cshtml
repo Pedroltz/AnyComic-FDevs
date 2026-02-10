@@ -54,11 +54,11 @@
         /* Top Navigation Bar */
         .reader-header {
             background-color: var(--bg-darker);
-            padding: 12px 20px;
+            padding: 10px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
             z-index: 100;
             transition: transform 0.3s ease;
         }
@@ -70,7 +70,7 @@
         .header-left, .header-right {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 10px;
         }
 
         .header-center {
@@ -95,15 +95,17 @@
             background-color: transparent;
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-light);
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 0 14px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
+            font-size: 13px;
+            height: 36px;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             gap: 6px;
             text-decoration: none;
+            white-space: nowrap;
         }
 
         .reader-btn:hover {
@@ -132,15 +134,23 @@
             background-color: var(--bg-darker);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-light);
-            padding: 8px 12px;
-            border-radius: 4px;
+            padding: 7px 10px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
+            height: 36px;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23999'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
         }
 
         .page-selector:focus {
-            outline: 2px solid var(--primary-red);
+            outline: none;
             border-color: var(--primary-red);
+            box-shadow: 0 0 0 2px rgba(239, 44, 47, 0.25);
         }
 
         /* Image Viewer */
@@ -235,11 +245,11 @@
         /* Bottom Controls */
         .reader-footer {
             background-color: var(--bg-darker);
-            padding: 16px 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6);
             z-index: 100;
             transition: transform 0.3s ease;
         }
@@ -620,20 +630,59 @@
         /* Responsive Design */
         @@media (max-width: 768px) {
             .reader-header {
-                padding: 10px 12px;
+                padding: 8px 10px;
             }
 
-            .manga-title {
-                font-size: 14px;
+            .header-left, .header-right {
+                gap: 6px;
             }
 
-            .page-counter {
-                font-size: 11px;
+            /* Hide button text on mobile, show icon only */
+            .btn-text {
+                display: none;
+            }
+
+            /* Back button: icon only on mobile */
+            .header-left .reader-btn {
+                padding: 0;
+                width: 32px;
+                height: 32px;
+                justify-content: center;
+                border-radius: 6px;
             }
 
             .reader-btn {
-                padding: 6px 12px;
+                height: 32px;
+                padding: 0 10px;
                 font-size: 12px;
+                border-radius: 6px;
+            }
+
+            /* Fullscreen button: icon only */
+            .header-right .reader-btn {
+                padding: 0;
+                width: 32px;
+                height: 32px;
+                justify-content: center;
+            }
+
+            .page-selector {
+                height: 32px;
+                font-size: 12px;
+                padding: 0 22px 0 8px;
+                border-radius: 6px;
+                background-position: right 6px center;
+            }
+
+            .page-selector#chapterSelector {
+                max-width: 110px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .page-selector#pageSelector {
+                max-width: 80px;
             }
 
             .nav-arrow {
@@ -653,8 +702,22 @@
                 display: none;
             }
 
+            /* Footer */
+            .reader-footer {
+                padding: 10px 12px;
+            }
+
+            .footer-controls .reader-btn {
+                height: 32px;
+                padding: 0;
+                width: 32px;
+                justify-content: center;
+                font-size: 12px;
+            }
+
             .progress-bar-container {
-                max-width: 200px;
+                flex: 1;
+                max-width: none;
                 margin: 0 10px;
             }
 
@@ -691,11 +754,11 @@
         <!-- Top Navigation Bar -->
         <header class="reader-header" id="readerHeader">
             <div class="header-left">
-                <a href="@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })" class="reader-btn">
+                <a href="@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })" class="reader-btn" title="Back">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
                     </svg>
-                    Back
+                    <span class="btn-text">Back</span>
                 </a>
             </div>
             <div class="header-center">
@@ -827,7 +890,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
                     </svg>
-                    Previous
+                    <span class="btn-text">Previous</span>
                 </button>
             </div>
 
@@ -839,7 +902,7 @@
 
             <div class="footer-controls">
                 <button class="reader-btn reader-btn-primary" id="nextBtnFooter" onclick="nextPage()">
-                    Next
+                    <span class="btn-text">Next</span>
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
                         <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
                     </svg>
