@@ -73,7 +73,7 @@ namespace AnyComic.Services
                 var coverUrl = ExtractCoverUrl(htmlDoc);
                 if (!string.IsNullOrEmpty(coverUrl))
                 {
-                    var coverPath = await DownloadCoverImage(coverUrl, manga.Titulo);
+                    var coverPath = await DownloadCoverImage(coverUrl);
                     if (coverPath != null)
                     {
                         manga.ImagemCapa = coverPath;
@@ -283,11 +283,13 @@ namespace AnyComic.Services
                 var ogImage = htmlDoc.DocumentNode.SelectSingleNode("//meta[@property='og:image']");
                 if (ogImage != null)
                 {
-                    return ogImage.GetAttributeValue("content", null!);
+                    var content = ogImage.GetAttributeValue("content", "");
+                    return string.IsNullOrEmpty(content) ? null : content;
                 }
             }
 
-            return coverNode?.GetAttributeValue("src", null!);
+            var src = coverNode?.GetAttributeValue("src", "");
+            return string.IsNullOrEmpty(src) ? null : src;
         }
 
         private List<ChapterInfo> ExtractChapterList(HtmlDocument htmlDoc)
@@ -467,7 +469,7 @@ namespace AnyComic.Services
             }
         }
 
-        private async Task<string?> DownloadCoverImage(string coverUrl, string mangaTitle)
+        private async Task<string?> DownloadCoverImage(string coverUrl)
         {
             try
             {

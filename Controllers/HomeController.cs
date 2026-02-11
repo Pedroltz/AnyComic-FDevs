@@ -19,13 +19,14 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var mangas = await _context.Mangas.ToListAsync();
-
         // Get newest mangas (last 10 added)
         var newest = await _context.Mangas
             .OrderByDescending(m => m.DataCriacao)
             .Take(10)
             .ToListAsync();
+
+        // Get all mangas for the view
+        var mangas = await _context.Mangas.ToListAsync();
 
         // Get active banners ordered by display order (include Manga for showcase type)
         var banners = await _context.Banners

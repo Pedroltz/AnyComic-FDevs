@@ -322,6 +322,14 @@ namespace AnyComic.Services
                     {
                         var attributes = chapterData.GetProperty("attributes");
 
+                        // Skip chapters with external URLs (e.g., MangaPlus) - they have no downloadable pages
+                        var externalUrl = attributes.TryGetProperty("externalUrl", out var extUrl) ? extUrl.GetString() : null;
+                        var pageCount = attributes.GetProperty("pages").GetInt32();
+                        if (!string.IsNullOrEmpty(externalUrl) || pageCount == 0)
+                        {
+                            continue;
+                        }
+
                         var chapter = new MangaDexChapter
                         {
                             Id = chapterData.GetProperty("id").GetString() ?? "",
@@ -329,7 +337,7 @@ namespace AnyComic.Services
                             Title = attributes.TryGetProperty("title", out var t) ? t.GetString() : null,
                             Volume = attributes.TryGetProperty("volume", out var v) ? v.GetString() : null,
                             Language = attributes.GetProperty("translatedLanguage").GetString() ?? "",
-                            Pages = attributes.GetProperty("pages").GetInt32()
+                            Pages = pageCount
                         };
 
                         chapters.Add(chapter);
@@ -345,7 +353,14 @@ namespace AnyComic.Services
                     await Task.Delay(500);
                 }
 
-                return chapters;
+                // Deduplicate: keep the version with most pages for each chapter number
+                var deduplicated = chapters
+                    .GroupBy(c => c.Chapter ?? "0")
+                    .Select(g => g.OrderByDescending(c => c.Pages).First())
+                    .ToList();
+
+                Console.WriteLine($"Found {chapters.Count} chapters, {deduplicated.Count} after deduplication");
+                return deduplicated;
             }
             catch (Exception ex)
             {

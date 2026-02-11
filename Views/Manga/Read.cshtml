@@ -277,6 +277,7 @@
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 3px;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .progress-bar-fill {
@@ -943,7 +944,7 @@
             </div>
 
             <div class="progress-bar-container">
-                <div class="progress-bar-custom">
+                <div class="progress-bar-custom" id="progressBar" onclick="onProgressBarClick(event)">
                     <div class="progress-bar-fill" style="width: @((paginaAtual * 100.0 / totalPaginas).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))%"></div>
                 </div>
             </div>
@@ -1507,6 +1508,15 @@
         function jumpToPage(pageNum) {
             const page = parseInt(pageNum);
             navigateToPage(readingMode !== 'single' ? getAlignedPage(page) : page);
+        }
+
+        function onProgressBarClick(e) {
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percent = clickX / rect.width;
+            const targetPage = Math.max(1, Math.min(totalPages, Math.round(percent * totalPages)));
+            jumpToPage(targetPage);
         }
 
         function changeChapter(capituloNumero) {

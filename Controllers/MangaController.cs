@@ -89,17 +89,14 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            // Load page counts separately using efficient COUNT queries
-            // This loads ONLY the Paginas collection for each chapter (much faster than full query)
+            // Load pages for chapters and manga
             if (manga.Capitulos.Any())
             {
-                // Load pages for each chapter in a single optimized query
                 var capituloIds = manga.Capitulos.Select(c => c.Id).ToList();
                 var paginasPorCapitulo = await _context.PaginasMangas
                     .Where(p => capituloIds.Contains(p.CapituloId))
                     .ToListAsync();
 
-                // Assign pages to their respective chapters
                 foreach (var capitulo in manga.Capitulos)
                 {
                     capitulo.Paginas = paginasPorCapitulo
@@ -108,7 +105,6 @@ namespace AnyComic.Controllers
                 }
             }
 
-            // Load pages for the manga (for backward compatibility with non-chapter manga)
             await _context.Entry(manga)
                 .Collection(m => m.Paginas)
                 .LoadAsync();

@@ -116,7 +116,7 @@ namespace AnyComic.Services
                 {
                     Titulo = CleanTitle(titulo),
                     Autor = autor,
-                    Descricao = $"Imported from e-hentai.org",
+                    Descricao = "Imported from e-hentai.org",
                     DataCriacao = dataCriacao,
                     ImagemCapa = null! // Will be set from first page
                 };

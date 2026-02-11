@@ -1507,6 +1507,109 @@ namespace AnyComic.Controllers
             }
         }
 
+        /// <summary>
+        /// POST: Admin/ImportFromWeebCentral - AJAX endpoint to import manga from WeebCentral URL
+        /// </summary>
+        [HttpPost]
+        public async Task<IActionResult> ImportFromWeebCentral([FromBody] WeebCentralImportRequest request)
+        {
+            if (!IsAdmin())
+            {
+                return Json(new { success = false, message = "Unauthorized" });
+            }
+
+            if (string.IsNullOrEmpty(request?.Url))
+            {
+                return Json(new { success = false, message = "URL is required" });
+            }
+
+            try
+            {
+                var importer = new WeebCentralImporter(_environment);
+                var result = await importer.ImportFromUrl(
+                    request.Url,
+                    request.ChapterRange ?? "all"
+                );
+
+                if (result.HasValue)
+                {
+                    var importedManga = result.Value.manga;
+                    var chapters = result.Value.chapters;
+
+                    if (chapters.Count == 0)
+                    {
+                        return Json(new { success = false, message = "No chapters were successfully downloaded" });
+                    }
+
+                    // Save manga to database
+                    _context.Mangas.Add(importedManga);
+                    await _context.SaveChangesAsync();
+
+                    int totalPages = 0;
+                    var chapterSummaries = new List<string>();
+
+                    // Create chapters and pages in database
+                    foreach (var chapterData in chapters)
+                    {
+                        if (!decimal.TryParse(chapterData.ChapterNumber, out decimal chapterNum))
+                        {
+                            chapterNum = 0;
+                        }
+
+                        var capitulo = new Capitulo
+                        {
+                            MangaId = importedManga.Id,
+                            NumeroCapitulo = (int)Math.Floor(chapterNum),
+                            NomeCapitulo = chapterData.ChapterTitle,
+                            DataCriacao = DateTime.Now
+                        };
+                        _context.Capitulos.Add(capitulo);
+                        await _context.SaveChangesAsync();
+
+                        int pageNumber = 1;
+                        foreach (var pagePath in chapterData.PagePaths)
+                        {
+                            var paginaManga = new PaginaManga
+                            {
+                                MangaId = importedManga.Id,
+                                CapituloId = capitulo.Id,
+                                NumeroPagina = pageNumber++,
+                                CaminhoImagem = pagePath,
+                                DataUpload = DateTime.Now
+                            };
+                            _context.PaginasMangas.Add(paginaManga);
+                        }
+
+                        await _context.SaveChangesAsync();
+
+                        totalPages += chapterData.PagePaths.Count;
+                        chapterSummaries.Add($"Chapter {chapterData.ChapterNumber}: {chapterData.PagePaths.Count} pages");
+                    }
+
+                    return Json(new
+                    {
+                        success = true,
+                        mangaId = importedManga.Id,
+                        titulo = importedManga.Titulo,
+                        autor = importedManga.Autor,
+                        descricao = importedManga.Descricao,
+                        totalChapters = chapters.Count,
+                        totalPages = totalPages,
+                        chapters = chapterSummaries,
+                        message = $"Manga '{importedManga.Titulo}' imported successfully with {chapters.Count} chapter(s) and {totalPages} total pages!"
+                    });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "Failed to import from WeebCentral. Please check the URL and try again." });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
+            }
+        }
+
     }
 
     /// <summary>
@@ -1541,6 +1644,15 @@ namespace AnyComic.Controllers
     /// Request model for MangaLivre import
     /// </summary>
     public class MangaLivreImportRequest
+    {
+        public string Url { get; set; } = string.Empty;
+        public string? ChapterRange { get; set; }
+    }
+
+    /// <summary>
+    /// Request model for WeebCentral import
+    /// </summary>
+    public class WeebCentralImportRequest
     {
         public string Url { get; set; } = string.Empty;
         public string? ChapterRange { get; set; }
