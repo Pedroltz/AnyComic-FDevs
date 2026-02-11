@@ -79,6 +79,18 @@
                                                 <strong>Examples:</strong> "all" = all chapters, "1-7" = chapters 1 to 7, "1,3,5" = specific chapters
                                             </div>
                                         </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" style="vertical-align: text-bottom; margin-right: 4px;">
+                                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5z"/>
+                                                </svg>
+                                                Proxy URL (optional)
+                                            </label>
+                                            <input type="text" class="form-control" id="weebcentralProxyUrl" placeholder="e.g., http://user:pass@proxy:port (leave empty for direct)" style="background-color: var(--bg-primary); color: var(--text-primary); border-color: var(--border-color);">
+                                            <div class="form-text">
+                                                Use a proxy if the server IP is blocked by WeebCentral (common on cloud servers).
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- MangaLivre Options (Hidden by default) -->
@@ -399,16 +411,17 @@
                     });
                 } else if (importSource === 'weebcentral') {
                     const chapterRange = document.getElementById('weebcentralChapterRange').value;
+                    const proxyUrl = document.getElementById('weebcentralProxyUrl').value.trim();
+
+                    const bodyData = { url: url, chapterRange: chapterRange };
+                    if (proxyUrl) bodyData.proxyUrl = proxyUrl;
 
                     response = await fetch('@Url.Action("ImportFromWeebCentral", "Admin")', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            url: url,
-                            chapterRange: chapterRange
-                        })
+                        body: JSON.stringify(bodyData)
                     });
                 } else {
                     response = await fetch('@Url.Action("ImportFromEHentai", "Admin")', {

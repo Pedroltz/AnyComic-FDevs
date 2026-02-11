@@ -1,5 +1,6 @@
 using AnyComic.Models;
 using HtmlAgilityPack;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace AnyComic.Services
@@ -10,11 +11,35 @@ namespace AnyComic.Services
         private readonly IWebHostEnvironment _environment;
         private const string BASE_URL = "https://weebcentral.com";
 
-        public WeebCentralImporter(IWebHostEnvironment environment)
+        public WeebCentralImporter(IWebHostEnvironment environment, string? proxyUrl = null)
         {
             _environment = environment;
-            _httpClient = new HttpClient();
+
+            var handler = new HttpClientHandler();
+
+            // Configure proxy if provided (useful for cloud servers blocked by WeebCentral)
+            if (!string.IsNullOrEmpty(proxyUrl))
+            {
+                handler.Proxy = new WebProxy(proxyUrl);
+                handler.UseProxy = true;
+                Console.WriteLine($"Using proxy: {proxyUrl}");
+            }
+
+            _httpClient = new HttpClient(handler);
+            _httpClient.Timeout = TimeSpan.FromSeconds(60);
+
+            // Realistic browser headers to avoid being blocked
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36");
+            _httpClient.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8");
+            _httpClient.DefaultRequestHeaders.Add("Accept-Language", "en-US,en;q=0.9");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua", "\"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Mobile", "?0");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Ch-Ua-Platform", "\"Windows\"");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Dest", "document");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Mode", "navigate");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-Site", "none");
+            _httpClient.DefaultRequestHeaders.Add("Sec-Fetch-User", "?1");
+            _httpClient.DefaultRequestHeaders.Add("Upgrade-Insecure-Requests", "1");
         }
 
         #region DTOs

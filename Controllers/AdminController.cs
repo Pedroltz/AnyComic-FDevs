@@ -1525,7 +1525,7 @@ namespace AnyComic.Controllers
 
             try
             {
-                var importer = new WeebCentralImporter(_environment);
+                var importer = new WeebCentralImporter(_environment, request.ProxyUrl);
                 var result = await importer.ImportFromUrl(
                     request.Url,
                     request.ChapterRange ?? "all"
@@ -1656,6 +1656,7 @@ namespace AnyComic.Controllers
     {
         public string Url { get; set; } = string.Empty;
         public string? ChapterRange { get; set; }
+        public string? ProxyUrl { get; set; }
     }
 
 }
