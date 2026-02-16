@@ -4,6 +4,7 @@ using AnyComic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AnyComic.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251104205612_AddBannersTable")]
+    partial class AddBannersTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,18 +44,12 @@ namespace AnyComic.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int?>("MangaId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Ordem")
                         .HasColumnType("int");
 
                     b.Property<string>("Subtitulo")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("Tipo")
-                        .HasColumnType("int");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
@@ -61,37 +58,7 @@ namespace AnyComic.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MangaId");
-
                     b.ToTable("Banners");
-                });
-
-            modelBuilder.Entity("AnyComic.Models.Capitulo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("MangaId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("NomeCapitulo")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<int>("NumeroCapitulo")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MangaId");
-
-                    b.ToTable("Capitulos");
                 });
 
             modelBuilder.Entity("AnyComic.Models.Favorito", b =>
@@ -170,9 +137,6 @@ namespace AnyComic.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("CapituloId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("DataUpload")
                         .HasColumnType("datetime2");
 
@@ -183,8 +147,6 @@ namespace AnyComic.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CapituloId");
 
                     b.HasIndex("MangaId");
 
@@ -262,27 +224,6 @@ namespace AnyComic.Migrations
                     b.ToTable("UsuariosAdmin");
                 });
 
-            modelBuilder.Entity("AnyComic.Models.Banner", b =>
-                {
-                    b.HasOne("AnyComic.Models.Manga", "Manga")
-                        .WithMany()
-                        .HasForeignKey("MangaId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Manga");
-                });
-
-            modelBuilder.Entity("AnyComic.Models.Capitulo", b =>
-                {
-                    b.HasOne("AnyComic.Models.Manga", "Manga")
-                        .WithMany("Capitulos")
-                        .HasForeignKey("MangaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Manga");
-                });
-
             modelBuilder.Entity("AnyComic.Models.Favorito", b =>
                 {
                     b.HasOne("AnyComic.Models.Manga", "Manga")
@@ -304,32 +245,17 @@ namespace AnyComic.Migrations
 
             modelBuilder.Entity("AnyComic.Models.PaginaManga", b =>
                 {
-                    b.HasOne("AnyComic.Models.Capitulo", "Capitulo")
-                        .WithMany("Paginas")
-                        .HasForeignKey("CapituloId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("AnyComic.Models.Manga", "Manga")
                         .WithMany("Paginas")
                         .HasForeignKey("MangaId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Capitulo");
 
                     b.Navigation("Manga");
                 });
 
-            modelBuilder.Entity("AnyComic.Models.Capitulo", b =>
-                {
-                    b.Navigation("Paginas");
-                });
-
             modelBuilder.Entity("AnyComic.Models.Manga", b =>
                 {
-                    b.Navigation("Capitulos");
-
                     b.Navigation("Favoritos");
 
                     b.Navigation("Paginas");

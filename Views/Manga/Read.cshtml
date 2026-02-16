@@ -1,57 +1,1765 @@
 @model AnyComic.Models.PaginaManga
 
 @{
-    ViewData["Title"] = $"{ViewBag.MangaTitulo} - Página {ViewBag.PaginaAtual}";
+    ViewData["Title"] = $"{ViewBag.MangaTitulo} - Page {ViewBag.PaginaAtual}";
+    Layout = null; // No layout for immersive reading experience
+
+    var capituloAtual = (AnyComic.Models.Capitulo)ViewBag.CapituloAtual;
+    var capitulos = (List<AnyComic.Models.Capitulo>)ViewBag.Capitulos;
+    var proximoCapitulo = ViewBag.ProximoCapitulo as AnyComic.Models.Capitulo;
+    var capituloAnterior = ViewBag.CapituloAnterior as AnyComic.Models.Capitulo;
+    int paginaAtual = (int)ViewBag.PaginaAtual;
+    int totalPaginas = (int)ViewBag.TotalPaginas;
 }
 
-<div class="container-fluid bg-dark min-vh-100 d-flex flex-column">
-    <div class="row bg-black text-white py-2">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                <a asp-controller="Manga" asp-action="Details" asp-route-id="@ViewBag.MangaId" class="btn btn-sm btn-outline-light">
-                    Voltar
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" type="image/x-icon" href="~/icon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --primary-red: #ef2c2f;
+            --bg-dark: #1a1a1a;
+            --bg-darker: #0d0d0d;
+            --text-light: #ffffff;
+            --text-muted: #999999;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Reader Container */
+        .reader-container {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Top Navigation Bar */
+        .reader-header {
+            background-color: var(--bg-darker);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .reader-header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-left, .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-center {
+            flex: 1;
+            text-align: center;
+        }
+
+        .manga-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .page-counter {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Buttons */
+        .reader-btn {
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 0 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            height: 36px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .reader-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            color: var(--text-light);
+        }
+
+        .reader-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .reader-btn-primary {
+            background-color: var(--primary-red);
+            border-color: var(--primary-red);
+        }
+
+        .reader-btn-primary:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        /* Page Selector */
+        .page-selector {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            height: 36px;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23999'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 24px;
+        }
+
+        .page-selector:focus {
+            outline: none;
+            border-color: var(--primary-red);
+            box-shadow: 0 0 0 2px rgba(239, 44, 47, 0.25);
+        }
+
+        /* Image Viewer */
+        .image-viewer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            background-color: var(--bg-dark);
+        }
+
+        .manga-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            cursor: zoom-in;
+            transform-origin: 0 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .manga-image.zoomed {
+            cursor: grab;
+        }
+
+        .manga-image.dragging {
+            cursor: grabbing;
+        }
+
+        /* Zoom Indicator */
+        .zoom-indicator {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--text-light);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 90;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .zoom-indicator.visible {
+            opacity: 1;
+        }
+
+        /* Navigation Controls */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(0, 0, 0, 0.6);
+            border: none;
+            color: var(--text-light);
+            width: 60px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .nav-arrow:hover:not(:disabled) {
+            background-color: rgba(239, 44, 47, 0.8);
+        }
+
+        .nav-arrow:disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        .nav-arrow.prev {
+            left: 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .nav-arrow.next {
+            right: 0;
+            border-radius: 8px 0 0 8px;
+        }
+
+        /* Bottom Controls */
+        .reader-footer {
+            background-color: var(--bg-darker);
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .reader-footer.hidden {
+            transform: translateY(100%);
+        }
+
+        .footer-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar-container {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 20px;
+        }
+
+        .progress-bar-custom {
+            width: 100%;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--primary-red);
+            transition: width 0.3s ease;
+        }
+
+        /* Zoom Controls - Floating top-left overlay */
+        .zoom-controls {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 6px 10px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .zoom-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .zoom-controls .zoom-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .zoom-controls .zoom-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            cursor: pointer;
+        }
+
+        .zoom-slider::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-red);
+            border: none;
+            cursor: pointer;
+        }
+
+        .zoom-level-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 36px;
+            text-align: center;
+        }
+
+        /* Reading Mode Controls (floating, separate from zoom) */
+        .reading-mode-controls {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 90;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 6px;
+            border-radius: 8px;
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .reading-mode-controls.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Reading Mode Toggle */
+        .reading-mode-wrapper {
+            position: relative;
+        }
+
+        .reading-mode-toggle {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+
+        .reading-mode-toggle:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .reading-mode-menu {
+            display: none;
+            position: absolute;
+            top: 36px;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 6px;
+            padding: 4px;
+            min-width: 180px;
+            backdrop-filter: blur(8px);
+            z-index: 100;
+        }
+
+        .reading-mode-menu.open {
+            display: block;
+        }
+
+        .reading-mode-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .reading-mode-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+
+        .reading-mode-option.active {
+            color: var(--primary-red);
+        }
+
+        .reading-mode-option svg {
+            flex-shrink: 0;
+        }
+
+        /* Dual Page Container */
+        .dual-page-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+
+        .dual-page-container.zoomed {
+            cursor: grab;
+        }
+
+        .dual-page-container.dragging {
+            cursor: grabbing;
+        }
+
+        .dual-page-container .manga-image {
+            max-width: 50%;
+            max-height: 100%;
+            object-fit: contain;
+            transform: none !important;
+        }
+
+        .dual-page-container.rtl-mode {
+            flex-direction: row-reverse;
+        }
+
+        /* Fullscreen styles */
+        .reader-container.is-fullscreen .reader-header,
+        .reader-container.is-fullscreen .reader-footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .reader-container.is-fullscreen .reader-header {
+            top: 0;
+        }
+
+        .reader-container.is-fullscreen .reader-footer {
+            bottom: 0;
+        }
+
+        .reader-container.is-fullscreen .image-viewer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .reader-container.is-fullscreen .manga-image {
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+
+        .reader-container.is-fullscreen .dual-page-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .reader-container.is-fullscreen .dual-page-container .manga-image {
+            max-width: 50vw;
+            max-height: 100vh;
+        }
+
+        /* Keyboard Hint */
+        .keyboard-hint {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: var(--text-muted);
+            z-index: 90;
+            animation: fadeOut 3s forwards;
+        }
+
+        @@keyframes fadeOut {
+            0%, 50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        /* Chapter Transition Modal */
+        .chapter-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chapter-modal-overlay.active {
+            display: flex;
+        }
+
+        .chapter-modal-card {
+            background-color: var(--bg-darker);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .chapter-modal-card h2 {
+            font-size: 20px;
+            margin-bottom: 8px;
+            color: var(--text-light);
+        }
+
+        .chapter-modal-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+        }
+
+        .chapter-modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chapter-modal-btn {
+            padding: 12px 24px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .chapter-modal-btn-primary {
+            background-color: var(--primary-red);
+            color: var(--text-light);
+        }
+
+        .chapter-modal-btn-primary:hover {
+            background-color: #dc3545;
+        }
+
+        .chapter-modal-btn-secondary {
+            background-color: transparent;
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chapter-modal-btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-light);
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .reader-header {
+                padding: 8px 10px;
+            }
+
+            .header-left, .header-right {
+                gap: 6px;
+            }
+
+            /* Hide button text on mobile, show icon only */
+            .btn-text {
+                display: none;
+            }
+
+            /* Back button: icon only on mobile */
+            .header-left .reader-btn {
+                padding: 0;
+                width: 36px;
+                height: 36px;
+                justify-content: center;
+                border-radius: 6px;
+            }
+
+            .reader-btn {
+                height: 36px;
+                padding: 0 10px;
+                font-size: 12px;
+                border-radius: 6px;
+            }
+
+            /* Hide fullscreen button on mobile */
+            .header-right .reader-btn[onclick="toggleFullscreen()"] {
+                display: none;
+            }
+
+            .page-selector {
+                height: 36px;
+                font-size: 12px;
+                padding: 0 22px 0 8px;
+                border-radius: 6px;
+                background-position: right 6px center;
+            }
+
+            .page-selector#chapterSelector {
+                max-width: 120px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .page-selector#pageSelector {
+                max-width: 80px;
+            }
+
+            .nav-arrow {
+                display: none !important;
+            }
+
+            .zoom-controls {
+                display: none !important;
+            }
+
+            /* Reading mode controls - moved to header-right via JS */
+            .reading-mode-controls {
+                opacity: 1 !important;
+                pointer-events: auto !important;
+                position: static;
+                background-color: transparent;
+                padding: 0;
+                border-radius: 0;
+                backdrop-filter: none;
+            }
+
+            .reading-mode-toggle {
+                width: 36px;
+                height: 36px;
+                border-radius: 6px;
+                background-color: transparent;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+            .reading-mode-toggle svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* Reading mode menu opens downward from header */
+            .reading-mode-menu {
+                top: 42px;
+                bottom: auto;
+                left: auto;
+                right: 0;
+                min-width: 200px;
+            }
+
+            .reading-mode-option {
+                min-height: 44px;
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            .header-center {
+                display: none;
+            }
+
+            /* Footer - fixed at bottom to avoid mobile viewport issues */
+            .reader-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 10px 12px;
+                padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+            }
+
+            /* Reserve space for fixed footer */
+            .image-viewer {
+                margin-bottom: 60px;
+            }
+
+            .footer-controls .reader-btn {
+                height: 38px;
+                padding: 0;
+                width: 38px;
+                justify-content: center;
+                font-size: 12px;
+            }
+
+            .progress-bar-container {
+                flex: 1;
+                min-width: 0;
+                max-width: none;
+                margin: 0 8px;
+            }
+
+            .progress-bar-custom {
+                height: 8px;
+                border-radius: 4px;
+            }
+
+            .keyboard-hint {
+                display: none;
+            }
+
+            .chapter-modal-card {
+                padding: 28px 20px;
+            }
+        }
+
+        /* Loading State */
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary-red);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @@keyframes spin {
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="reader-container">
+        <!-- Top Navigation Bar -->
+        <header class="reader-header" id="readerHeader">
+            <div class="header-left">
+                <a href="@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })" class="reader-btn" title="Back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                    </svg>
+                    <span class="btn-text">Back</span>
                 </a>
-                <h5 class="mb-0">@ViewBag.MangaTitulo - Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</h5>
-                <div></div>
+            </div>
+            <div class="header-center">
+                <h1 class="manga-title">@ViewBag.MangaTitulo</h1>
+                <div class="page-counter">
+                    @capituloAtual.NomeExibicao - Page @paginaAtual of @totalPaginas
+                </div>
+            </div>
+            <div class="header-right">
+                <select class="page-selector" id="chapterSelector" onchange="changeChapter(this.value)" title="Select Chapter">
+                    @foreach (var cap in capitulos)
+                    {
+                        if (cap.Id == capituloAtual.Id)
+                        {
+                            <option value="@cap.NumeroCapitulo" selected>@cap.NomeExibicao</option>
+                        }
+                        else
+                        {
+                            <option value="@cap.NumeroCapitulo">@cap.NomeExibicao</option>
+                        }
+                    }
+                </select>
+                <select class="page-selector" id="pageSelector" onchange="jumpToPage(this.value)" title="Select Page">
+                    @for (int i = 1; i <= totalPaginas; i++)
+                    {
+                        if (i == paginaAtual)
+                        {
+                            <option value="@i" selected>Page @i</option>
+                        }
+                        else
+                        {
+                            <option value="@i">Page @i</option>
+                        }
+                    }
+                </select>
+                <button class="reader-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Image Viewer with Navigation Arrows -->
+        <main class="image-viewer" id="imageViewer">
+            <button class="nav-arrow prev" id="prevBtn" onclick="previousPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </button>
+
+            <div class="dual-page-container" id="dualPageContainer" style="display:none;">
+                <img src="@Model.CaminhoImagem"
+                     alt="Page @Model.NumeroPagina"
+                     class="manga-image"
+                     id="mangaImageLeft"
+                     draggable="false">
+                <img src=""
+                     alt=""
+                     class="manga-image"
+                     id="mangaImageRight"
+                     draggable="false">
+            </div>
+            <img src="@Model.CaminhoImagem"
+                 alt="Page @Model.NumeroPagina"
+                 class="manga-image"
+                 id="mangaImage"
+                 onload="hideLoading()"
+                 draggable="false">
+
+            <button class="nav-arrow next" id="nextBtn" onclick="nextPage()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+
+            <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+            <div class="zoom-indicator" id="zoomIndicator">100%</div>
+
+            <!-- Zoom Controls (floating top-left) -->
+            <div class="zoom-controls" id="zoomControls">
+                <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">-</button>
+                <input type="range" class="zoom-slider" id="zoomSlider" min="100" max="500" value="100" oninput="onZoomSlider(this.value)">
+                <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                <span class="zoom-level-text" id="zoomLevelText">100%</span>
+                <button class="zoom-btn" onclick="resetZoom(); showZoomLevel();" title="Reset Zoom" style="font-size: 12px;">1:1</button>
+            </div>
+
+            <!-- Reading Mode Toggle (separate from zoom, visible on mobile) -->
+            <div class="reading-mode-controls" id="readingModeControls">
+                <div class="reading-mode-wrapper">
+                    <button class="reading-mode-toggle" id="readingModeToggle" onclick="toggleReadingModeMenu(event)" title="Reading Mode">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                        </svg>
+                    </button>
+                    <div class="reading-mode-menu" id="readingModeMenu">
+                        <button class="reading-mode-option active" data-mode="single" onclick="setReadingMode('single')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="4" y="1" width="8" height="14" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1.2"/>
+                            </svg>
+                            Single Page
+                        </button>
+                        <button class="reading-mode-option" data-mode="double-ltr" onclick="setReadingMode('double-ltr')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="1" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <rect x="9" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <path d="M5 8l2 0M5 7l2 1-2 1z" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                            Double (L→R)
+                        </button>
+                        <button class="reading-mode-option" data-mode="double-rtl" onclick="setReadingMode('double-rtl')">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <rect x="1" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <rect x="9" y="2" width="6" height="12" rx="1" ry="1" stroke="currentColor" fill="none" stroke-width="1"/>
+                                <path d="M11 8l-2 0M11 7l-2 1 2 1z" fill="currentColor" opacity="0.5"/>
+                            </svg>
+                            Double (R→L)
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Controls -->
+        <footer class="reader-footer" id="readerFooter">
+            <div class="footer-controls">
+                <button class="reader-btn" id="prevBtnFooter" onclick="previousPage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                    </svg>
+                    <span class="btn-text">Previous</span>
+                </button>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar-custom" id="progressBar" onclick="onProgressBarClick(event)">
+                    <div class="progress-bar-fill" style="width: @((paginaAtual * 100.0 / totalPaginas).ToString("F2", System.Globalization.CultureInfo.InvariantCulture))%"></div>
+                </div>
+            </div>
+
+            <div class="footer-controls">
+                <button class="reader-btn reader-btn-primary" id="nextBtnFooter" onclick="nextPage()">
+                    <span class="btn-text">Next</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                </button>
+            </div>
+        </footer>
+
+        <!-- Keyboard Hint -->
+        <div class="keyboard-hint">
+            Use arrow keys to navigate
+        </div>
+    </div>
+
+    <!-- Chapter Transition Modal -->
+    <div class="chapter-modal-overlay" id="chapterModal">
+        <div class="chapter-modal-card">
+            <h2 id="chapterModalTitle"></h2>
+            <p id="chapterModalText"></p>
+            <div class="chapter-modal-buttons">
+                <button class="chapter-modal-btn chapter-modal-btn-primary" id="chapterModalAction" onclick="chapterModalNavigate()"></button>
+                <button class="chapter-modal-btn chapter-modal-btn-secondary" onclick="closeChapterModal()">Back</button>
             </div>
         </div>
     </div>
 
-    <div class="row flex-grow-1">
-        <div class="col text-center d-flex align-items-center justify-content-center">
-            <img src="@Model.CaminhoImagem" class="img-fluid" alt="Página @Model.NumeroPagina" style="max-height: 90vh;">
-        </div>
-    </div>
+    <script>
+        const mangaId = @ViewBag.MangaId;
+        let currentPage = @paginaAtual;
+        const totalPages = @totalPaginas;
+        const currentChapterNum = @capituloAtual.NumeroCapitulo;
+        const pageMap = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.PageMap));
+        const hasNextChapter = @(proximoCapitulo != null ? "true" : "false");
+        const hasPrevChapter = @(capituloAnterior != null ? "true" : "false");
+        const nextChapterNum = @(proximoCapitulo != null ? proximoCapitulo.NumeroCapitulo : 0);
+        const prevChapterNum = @(capituloAnterior != null ? capituloAnterior.NumeroCapitulo : 0);
+        const nextChapterName = '@Html.Raw(proximoCapitulo != null ? System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(proximoCapitulo.NomeExibicao) : "")';
+        const prevChapterName = '@Html.Raw(capituloAnterior != null ? System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(capituloAnterior.NomeExibicao) : "")';
+        const currentChapterName = '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(capituloAtual.NomeExibicao))';
+        const mangaTitle = '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(ViewBag.MangaTitulo))';
+        const readBaseUrl = '@Url.Action("Read", "Manga")';
 
-    <div class="row bg-black text-white py-3">
-        <div class="col">
-            <div class="d-flex justify-content-between align-items-center">
-                @if (ViewBag.PaginaAtual > 1)
-                {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual - 1)"
-                       class="btn btn-primary">
-                        Página Anterior
-                    </a>
-                }
-                else
-                {
-                    <button class="btn btn-secondary" disabled>Página Anterior</button>
-                }
+        let pendingChapterNav = null;
 
-                <span>Página @ViewBag.PaginaAtual de @ViewBag.TotalPaginas</span>
+        function isMobile() {
+            return window.matchMedia('(max-width: 768px)').matches;
+        }
 
-                @if (ViewBag.PaginaAtual < ViewBag.TotalPaginas)
-                {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@ViewBag.MangaId" asp-route-pagina="@(ViewBag.PaginaAtual + 1)"
-                       class="btn btn-primary">
-                        Próxima Página
-                    </a>
+        // ===== READING MODE =====
+        let readingMode = localStorage.getItem('readingMode') || 'single';
+
+        const dualContainer = document.getElementById('dualPageContainer');
+        const imgLeft = document.getElementById('mangaImageLeft');
+        const imgRight = document.getElementById('mangaImageRight');
+
+        function toggleReadingModeMenu(e) {
+            e.stopPropagation();
+            document.getElementById('readingModeMenu').classList.toggle('open');
+        }
+
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('readingModeMenu');
+            if (menu && !e.target.closest('.reading-mode-wrapper')) {
+                menu.classList.remove('open');
+            }
+        });
+
+        function setReadingMode(mode) {
+            readingMode = mode;
+            localStorage.setItem('readingMode', mode);
+
+            // Update active state in menu
+            document.querySelectorAll('.reading-mode-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.mode === mode);
+            });
+
+            document.getElementById('readingModeMenu').classList.remove('open');
+
+            // Reset zoom before switching
+            resetZoom();
+
+            // Re-render current view
+            updateDualPageDisplay();
+        }
+
+        function getPageStep() {
+            if (readingMode === 'single') return 1;
+            // In double mode, if we're on the last page and it's odd, step is still 1
+            // Otherwise step 2
+            return 2;
+        }
+
+        function getAlignedPage(pageNum) {
+            // In double mode, pages are shown in pairs: 1-2, 3-4, 5-6...
+            // Always align to odd page as the "base"
+            if (readingMode === 'single') return pageNum;
+            return pageNum % 2 === 0 ? pageNum - 1 : pageNum;
+        }
+
+        function updateDualPageDisplay() {
+            if (readingMode === 'single') {
+                // Single mode: show single image, hide dual container
+                dualContainer.style.display = 'none';
+                img.style.display = '';
+                return;
+            }
+
+            // Double mode
+            const alignedPage = getAlignedPage(currentPage);
+            currentPage = alignedPage;
+
+            const firstPageInfo = pageMap.find(p => p.pagina === alignedPage);
+            const secondPageInfo = pageMap.find(p => p.pagina === alignedPage + 1);
+
+            if (!firstPageInfo) return;
+
+            // Hide single image, show dual container
+            img.style.display = 'none';
+            dualContainer.style.display = 'flex';
+
+            // Set RTL mode
+            dualContainer.classList.toggle('rtl-mode', readingMode === 'double-rtl');
+
+            // Load images
+            imgLeft.src = firstPageInfo.imagem;
+            imgLeft.alt = 'Page ' + alignedPage;
+
+            if (secondPageInfo) {
+                imgRight.src = secondPageInfo.imagem;
+                imgRight.alt = 'Page ' + (alignedPage + 1);
+                imgRight.style.display = '';
+            } else {
+                // Last page is alone (odd total)
+                imgRight.style.display = 'none';
+            }
+
+            // Track loading
+            let loadCount = 0;
+            const needed = secondPageInfo ? 2 : 1;
+            showLoading();
+            const onLoaded = () => {
+                loadCount++;
+                if (loadCount >= needed) hideLoading();
+            };
+            imgLeft.onload = onLoaded;
+            if (secondPageInfo) imgRight.onload = onLoaded;
+
+            // Update UI elements
+            updatePageUI();
+        }
+
+        function updatePageUI() {
+            const counter = document.querySelector('.page-counter');
+            if (readingMode !== 'single') {
+                const secondPage = currentPage + 1 <= totalPages ? currentPage + 1 : null;
+                const pageText = secondPage
+                    ? 'Pages ' + currentPage + '-' + secondPage + ' of ' + totalPages
+                    : 'Page ' + currentPage + ' of ' + totalPages;
+                if (counter) counter.textContent = currentChapterName + ' - ' + pageText;
+                document.title = mangaTitle + ' - Pages ' + currentPage + (secondPage ? '-' + secondPage : '');
+            } else {
+                if (counter) counter.textContent = currentChapterName + ' - Page ' + currentPage + ' of ' + totalPages;
+                document.title = mangaTitle + ' - Page ' + currentPage;
+            }
+
+            document.getElementById('pageSelector').value = currentPage;
+
+            const progressPercent = (currentPage * 100.0 / totalPages);
+            document.querySelector('.progress-bar-fill').style.width = progressPercent.toFixed(2) + '%';
+
+            const newUrl = readBaseUrl + '?id=' + mangaId +
+                '&capituloNumero=' + currentChapterNum +
+                '&pagina=' + currentPage;
+            history.replaceState(null, '', newUrl);
+        }
+
+        // ===== ZOOM & PAN SYSTEM =====
+        const img = document.getElementById('mangaImage');
+        const viewer = document.getElementById('imageViewer');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+
+        let scale = 1;
+        let panX = 0;
+        let panY = 0;
+        const MIN_SCALE = 1;
+        const MAX_SCALE = 5;
+
+        // Drag state (mouse)
+        let isDragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartPanX = 0;
+        let dragStartPanY = 0;
+
+        // Touch state
+        let lastTouchDist = 0;
+        let lastTouchMidX = 0;
+        let lastTouchMidY = 0;
+        let touchDragging = false;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchStartPanX = 0;
+        let touchStartPanY = 0;
+        let touchMoved = false;
+
+        // Double-tap detection
+        let lastTapTime = 0;
+
+        let zoomIndicatorTimeout;
+
+        const zoomSlider = document.getElementById('zoomSlider');
+        const zoomLevelText = document.getElementById('zoomLevelText');
+
+        function getZoomTarget() {
+            return readingMode === 'single' ? img : dualContainer;
+        }
+
+        function getImageLayout() {
+            const viewerRect = viewer.getBoundingClientRect();
+            const viewerW = viewerRect.width;
+            const viewerH = viewerRect.height;
+
+            if (readingMode !== 'single' && dualContainer.style.display !== 'none') {
+                // Dual mode: calculate the actual rendered area of both images combined
+                const leftRect = imgLeft.getBoundingClientRect();
+                const rightVisible = imgRight.style.display !== 'none';
+                const rightRect = rightVisible ? imgRight.getBoundingClientRect() : null;
+
+                // Total content area (both images side by side)
+                const contentLeft = leftRect.left;
+                const contentRight = rightVisible ? rightRect.right : leftRect.right;
+                const contentTop = Math.min(leftRect.top, rightVisible ? rightRect.top : leftRect.top);
+                const contentBottom = Math.max(leftRect.bottom, rightVisible ? rightRect.bottom : leftRect.bottom);
+
+                const displayW = (contentRight - contentLeft) / scale;
+                const displayH = (contentBottom - contentTop) / scale;
+                const offsetX = (contentLeft - viewerRect.left - panX) / scale;
+                const offsetY = (contentTop - viewerRect.top - panY) / scale;
+
+                return { viewerW, viewerH, displayW, displayH, offsetX, offsetY };
+            }
+
+            const imgW = img.naturalWidth || img.offsetWidth;
+            const imgH = img.naturalHeight || img.offsetHeight;
+            const ratio = Math.min(viewerW / imgW, viewerH / imgH);
+            const displayW = imgW * ratio;
+            const displayH = imgH * ratio;
+            // Flexbox centering offset
+            const offsetX = (viewerW - displayW) / 2;
+            const offsetY = (viewerH - displayH) / 2;
+            return { viewerW, viewerH, displayW, displayH, offsetX, offsetY };
+        }
+
+        function applyTransform() {
+            const target = getZoomTarget();
+            target.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+            if (scale > 1) {
+                target.classList.add('zoomed');
+            } else {
+                target.classList.remove('zoomed');
+            }
+        }
+
+        function clampPan() {
+            if (scale <= 1) {
+                panX = 0;
+                panY = 0;
+                return;
+            }
+            const { viewerW, viewerH, displayW, displayH, offsetX, offsetY } = getImageLayout();
+            const scaledW = displayW * scale;
+            const scaledH = displayH * scale;
+
+            // Image visual bounds: left = offsetX + panX, right = offsetX + panX + scaledW
+            // Clamp so image doesn't leave empty space (or stays within viewer if smaller)
+            const minPanX = Math.min(-offsetX, viewerW - offsetX - scaledW);
+            const maxPanX = Math.max(-offsetX, viewerW - offsetX - scaledW);
+            const minPanY = Math.min(-offsetY, viewerH - offsetY - scaledH);
+            const maxPanY = Math.max(-offsetY, viewerH - offsetY - scaledH);
+
+            panX = Math.max(minPanX, Math.min(maxPanX, panX));
+            panY = Math.max(minPanY, Math.min(maxPanY, panY));
+        }
+
+        function updateZoomUI() {
+            const pct = Math.round(scale * 100);
+            zoomIndicator.textContent = pct + '%';
+            zoomIndicator.classList.add('visible');
+            clearTimeout(zoomIndicatorTimeout);
+            zoomIndicatorTimeout = setTimeout(() => {
+                zoomIndicator.classList.remove('visible');
+            }, 1000);
+            // Sync slider
+            if (zoomSlider) zoomSlider.value = pct;
+            if (zoomLevelText) zoomLevelText.textContent = pct + '%';
+        }
+
+        function showZoomLevel() {
+            updateZoomUI();
+        }
+
+        function zoomTo(newScale, centerX, centerY) {
+            const { viewerW, viewerH, offsetX, offsetY } = getImageLayout();
+            const viewerRect = viewer.getBoundingClientRect();
+            const cx = (centerX !== undefined) ? centerX - viewerRect.left : viewerW / 2;
+            const cy = (centerY !== undefined) ? centerY - viewerRect.top : viewerH / 2;
+
+            const oldScale = scale;
+            scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+            // Adjust pan so the point under the cursor stays fixed
+            if (oldScale !== scale) {
+                const factor = scale / oldScale;
+                // Point in element-local coords: lx = (cx - offsetX - panX) / oldScale
+                const relX = cx - offsetX - panX;
+                const relY = cy - offsetY - panY;
+                panX = cx - offsetX - factor * relX;
+                panY = cy - offsetY - factor * relY;
+            }
+
+            clampPan();
+            applyTransform();
+            updateZoomUI();
+        }
+
+        function resetZoom() {
+            scale = 1;
+            panX = 0;
+            panY = 0;
+            // Clear transform on both targets
+            img.style.transform = '';
+            img.classList.remove('zoomed');
+            dualContainer.style.transform = '';
+            dualContainer.classList.remove('zoomed');
+            applyTransform();
+            updateZoomUI();
+        }
+
+        function zoomIn() {
+            zoomTo(scale + 0.25);
+        }
+
+        function zoomOut() {
+            zoomTo(scale - 0.25);
+        }
+
+        function onZoomSlider(value) {
+            zoomTo(parseInt(value) / 100);
+        }
+
+        // --- Mouse wheel zoom ---
+        viewer.addEventListener('wheel', function(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -0.15 : 0.15;
+            zoomTo(scale + delta * scale, e.clientX, e.clientY);
+        }, { passive: false });
+
+        // --- Mouse double-click to toggle zoom ---
+        viewer.addEventListener('dblclick', function(e) {
+            if (e.target.closest('.zoom-controls') || e.target.closest('.nav-arrow') || e.target.closest('.reading-mode-wrapper')) return;
+            e.preventDefault();
+            if (scale > 1) {
+                resetZoom();
+                showZoomLevel();
+            } else {
+                zoomTo(2.5, e.clientX, e.clientY);
+            }
+        });
+
+        // --- Mouse drag to pan ---
+        viewer.addEventListener('mousedown', function(e) {
+            if (e.target.closest('.zoom-controls') || e.target.closest('.nav-arrow') || e.target.closest('.reading-mode-wrapper')) return;
+            if (scale <= 1) return;
+            e.preventDefault();
+            isDragging = true;
+            dragStartX = e.clientX;
+            dragStartY = e.clientY;
+            dragStartPanX = panX;
+            dragStartPanY = panY;
+            getZoomTarget().classList.add('dragging');
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging) return;
+            panX = dragStartPanX + (e.clientX - dragStartX);
+            panY = dragStartPanY + (e.clientY - dragStartY);
+            clampPan();
+            applyTransform();
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isDragging) {
+                isDragging = false;
+                getZoomTarget().classList.remove('dragging');
+            }
+        });
+
+        // --- Touch: pinch-to-zoom + drag to pan + double-tap ---
+        function getTouchDist(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        function getTouchMid(touches) {
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        }
+
+        viewer.addEventListener('touchstart', function(e) {
+            if (e.touches.length === 2) {
+                // Pinch start
+                e.preventDefault();
+                lastTouchDist = getTouchDist(e.touches);
+                const mid = getTouchMid(e.touches);
+                lastTouchMidX = mid.x;
+                lastTouchMidY = mid.y;
+                touchDragging = false;
+            } else if (e.touches.length === 1) {
+                touchMoved = false;
+                const touch = e.touches[0];
+
+                // Double-tap detection (desktop/tablet only, not mobile)
+                const now = Date.now();
+                if (!isMobile() && now - lastTapTime < 300) {
+                    e.preventDefault();
+                    if (scale > 1) {
+                        resetZoom();
+                        showZoomLevel();
+                    } else {
+                        zoomTo(2.5, touch.clientX, touch.clientY);
+                    }
+                    lastTapTime = 0;
+                    return;
                 }
-                else
-                {
-                    <button class="btn btn-secondary" disabled>Próxima Página</button>
+                lastTapTime = now;
+
+                // Single touch drag (when zoomed)
+                if (scale > 1) {
+                    e.preventDefault();
+                    touchDragging = true;
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+                    touchStartPanX = panX;
+                    touchStartPanY = panY;
+                    getZoomTarget().classList.add('dragging');
                 }
-            </div>
-        </div>
-    </div>
-</div>
+            }
+        }, { passive: false });
+
+        viewer.addEventListener('touchmove', function(e) {
+            if (e.touches.length === 2) {
+                // Pinch zoom
+                e.preventDefault();
+                const dist = getTouchDist(e.touches);
+                const mid = getTouchMid(e.touches);
+                const factor = dist / lastTouchDist;
+
+                zoomTo(scale * factor, mid.x, mid.y);
+
+                // Also pan with the midpoint movement
+                panX += mid.x - lastTouchMidX;
+                panY += mid.y - lastTouchMidY;
+                clampPan();
+                applyTransform();
+
+                lastTouchDist = dist;
+                lastTouchMidX = mid.x;
+                lastTouchMidY = mid.y;
+            } else if (e.touches.length === 1 && touchDragging) {
+                // Single finger pan (when zoomed)
+                e.preventDefault();
+                const touch = e.touches[0];
+                const dx = touch.clientX - touchStartX;
+                const dy = touch.clientY - touchStartY;
+                if (Math.abs(dx) > 5 || Math.abs(dy) > 5) touchMoved = true;
+                panX = touchStartPanX + dx;
+                panY = touchStartPanY + dy;
+                clampPan();
+                applyTransform();
+            }
+        }, { passive: false });
+
+        viewer.addEventListener('touchend', function(e) {
+            if (e.touches.length < 2) {
+                lastTouchDist = 0;
+            }
+            if (e.touches.length === 0) {
+                touchDragging = false;
+                getZoomTarget().classList.remove('dragging');
+            }
+        });
+
+        // ===== KEYBOARD NAVIGATION =====
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('chapterModal');
+            if (modal.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeChapterModal();
+                } else if (e.key === 'Enter') {
+                    chapterModalNavigate();
+                }
+                return;
+            }
+
+            if (e.key === 'ArrowLeft') {
+                previousPage();
+            } else if (e.key === 'ArrowRight') {
+                nextPage();
+            } else if (e.key === 'Escape') {
+                if (scale > 1) {
+                    resetZoom();
+                    showZoomLevel();
+                } else {
+                    window.location.href = '@Url.Action("Details", "Manga", new { id = ViewBag.MangaId })';
+                }
+            } else if (e.key === 'f' || e.key === 'F') {
+                toggleFullscreen();
+            } else if (e.key === '+' || e.key === '=') {
+                zoomTo(scale + 0.25);
+            } else if (e.key === '-') {
+                zoomTo(scale - 0.25);
+            } else if (e.key === '0') {
+                resetZoom();
+                showZoomLevel();
+            }
+        });
+
+        // ===== PAGE NAVIGATION =====
+        function previousPage() {
+            if (scale > 1) { resetZoom(); }
+            const step = getPageStep();
+            if (currentPage > 1) {
+                const targetPage = Math.max(1, currentPage - step);
+                navigateToPage(targetPage);
+            } else if (hasPrevChapter) {
+                showChapterModal('prev');
+            }
+        }
+
+        function nextPage() {
+            if (scale > 1) { resetZoom(); }
+            const step = getPageStep();
+            // In dual mode, check if we're past the last viewable pair
+            const effectiveEnd = readingMode === 'single' ? currentPage : currentPage + (currentPage + 1 <= totalPages ? 1 : 0);
+            if (effectiveEnd < totalPages) {
+                navigateToPage(currentPage + step);
+            } else if (hasNextChapter) {
+                showChapterModal('next');
+            }
+        }
+
+        function jumpToPage(pageNum) {
+            const page = parseInt(pageNum);
+            navigateToPage(readingMode !== 'single' ? getAlignedPage(page) : page);
+        }
+
+        function onProgressBarClick(e) {
+            const bar = e.currentTarget;
+            const rect = bar.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const percent = clickX / rect.width;
+            const targetPage = Math.max(1, Math.min(totalPages, Math.round(percent * totalPages)));
+            jumpToPage(targetPage);
+        }
+
+        function changeChapter(capituloNumero) {
+            showLoading();
+            window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                '&capituloNumero=' + capituloNumero +
+                '&pagina=1';
+        }
+
+        function navigateToPage(pageNum) {
+            const pageInfo = pageMap.find(p => p.pagina === pageNum);
+            if (!pageInfo) return;
+
+            // Reset zoom
+            if (scale > 1) resetZoom();
+
+            // Update current page
+            currentPage = pageNum;
+
+            if (readingMode !== 'single') {
+                updateDualPageDisplay();
+            } else {
+                // Show loading spinner (hidden by img onload)
+                showLoading();
+
+                // Swap image source (triggers onload -> hideLoading)
+                img.src = pageInfo.imagem;
+                img.alt = 'Page ' + pageNum;
+
+                updatePageUI();
+            }
+
+            // Preload adjacent pages
+            preloadAdjacentPages();
+        }
+
+        // ===== CHAPTER TRANSITION MODAL =====
+        function showChapterModal(direction) {
+            pendingChapterNav = direction;
+            const modal = document.getElementById('chapterModal');
+            const title = document.getElementById('chapterModalTitle');
+            const text = document.getElementById('chapterModalText');
+            const actionBtn = document.getElementById('chapterModalAction');
+
+            if (direction === 'next') {
+                title.textContent = 'End of ' + currentChapterName;
+                text.textContent = 'Continue to ' + nextChapterName + '?';
+                actionBtn.textContent = 'Next Chapter';
+            } else {
+                title.textContent = 'Start of ' + currentChapterName;
+                text.textContent = 'Go back to ' + prevChapterName + '?';
+                actionBtn.textContent = 'Previous Chapter';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeChapterModal() {
+            document.getElementById('chapterModal').classList.remove('active');
+            pendingChapterNav = null;
+        }
+
+        function chapterModalNavigate() {
+            if (pendingChapterNav === 'next') {
+                showLoading();
+                window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                    '&capituloNumero=' + nextChapterNum +
+                    '&pagina=1';
+            } else if (pendingChapterNav === 'prev') {
+                showLoading();
+                window.location.href = '@Url.Action("Read", "Manga")?id=' + mangaId +
+                    '&capituloNumero=' + prevChapterNum +
+                    '&pagina=last';
+            }
+        }
+
+        // ===== UTILITIES =====
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+                document.querySelector('.reader-container').classList.add('is-fullscreen');
+            } else {
+                document.exitFullscreen();
+                document.querySelector('.reader-container').classList.remove('is-fullscreen');
+            }
+        }
+
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                document.querySelector('.reader-container').classList.remove('is-fullscreen');
+                // Show controls when exiting fullscreen
+                clearTimeout(hideTimeout);
+                showControls();
+            }
+        });
+
+        function showLoading() {
+            document.getElementById('loadingSpinner').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        }
+
+        // Auto-hide controls on mouse inactivity (only in fullscreen)
+        let hideTimeout;
+        let isMouseMoving = false;
+
+        function isFullscreen() {
+            return !!document.fullscreenElement;
+        }
+
+        function showControls() {
+            document.getElementById('readerHeader').classList.remove('hidden');
+            document.getElementById('readerFooter').classList.remove('hidden');
+            document.getElementById('zoomControls').classList.add('visible');
+            document.getElementById('readingModeControls').classList.add('visible');
+        }
+
+        function hideControls() {
+            if (!isMouseMoving && isFullscreen()) {
+                document.getElementById('readerHeader').classList.add('hidden');
+                document.getElementById('readerFooter').classList.add('hidden');
+                document.getElementById('zoomControls').classList.remove('visible');
+                // Keep reading mode controls visible on mobile
+                if (!isMobile()) {
+                    document.getElementById('readingModeControls').classList.remove('visible');
+                }
+            }
+        }
+
+        document.addEventListener('mousemove', function() {
+            isMouseMoving = true;
+            showControls();
+            clearTimeout(hideTimeout);
+            if (isFullscreen()) {
+                hideTimeout = setTimeout(function() {
+                    isMouseMoving = false;
+                    hideControls();
+                }, 3000);
+            }
+        });
+
+        // ===== MOBILE: SWIPE & TAP NAVIGATION =====
+
+        let swipeStartX = 0;
+        let swipeStartY = 0;
+        let swipeStartTime = 0;
+        let swipeMoved = false;
+
+        viewer.addEventListener('touchstart', function(e) {
+            if (!isMobile() || e.touches.length !== 1 || scale > 1) return;
+            swipeStartX = e.touches[0].clientX;
+            swipeStartY = e.touches[0].clientY;
+            swipeStartTime = Date.now();
+            swipeMoved = false;
+        }, { passive: true });
+
+        viewer.addEventListener('touchmove', function(e) {
+            if (!isMobile() || scale > 1) return;
+            const dx = Math.abs(e.touches[0].clientX - swipeStartX);
+            const dy = Math.abs(e.touches[0].clientY - swipeStartY);
+            if (dx > 10 || dy > 10) swipeMoved = true;
+        }, { passive: true });
+
+        viewer.addEventListener('touchend', function(e) {
+            if (!isMobile() || scale > 1) return;
+
+            const endX = e.changedTouches[0].clientX;
+            const endY = e.changedTouches[0].clientY;
+            const dx = endX - swipeStartX;
+            const dy = endY - swipeStartY;
+            const elapsed = Date.now() - swipeStartTime;
+
+            // Swipe detection: horizontal > 50px, faster than 300ms, more horizontal than vertical
+            if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5 && elapsed < 400) {
+                if (dx < 0) {
+                    nextPage();
+                } else {
+                    previousPage();
+                }
+                return;
+            }
+
+            // Tap detection: no significant movement, short press
+            if (!swipeMoved && elapsed < 300) {
+                const viewerRect = viewer.getBoundingClientRect();
+                const tapX = endX - viewerRect.left;
+                const viewerWidth = viewerRect.width;
+
+                // Tap right half = next, left half = previous
+                if (tapX > viewerWidth * 0.5) {
+                    nextPage();
+                } else {
+                    previousPage();
+                }
+            }
+        }, { passive: true });
+
+        // Preload adjacent page images for faster client-side navigation
+        function preloadAdjacentPages() {
+            const step = getPageStep();
+            // Preload next pages
+            for (let i = 1; i <= step + 1; i++) {
+                const p = currentPage + i;
+                if (p <= totalPages) {
+                    const info = pageMap.find(pg => pg.pagina === p);
+                    if (info) { const pre = new Image(); pre.src = info.imagem; }
+                }
+            }
+            // Preload previous pages
+            for (let i = 1; i <= step; i++) {
+                const p = currentPage - i;
+                if (p >= 1) {
+                    const info = pageMap.find(pg => pg.pagina === p);
+                    if (info) { const pre = new Image(); pre.src = info.imagem; }
+                }
+            }
+        }
+
+        // Initialize reading mode from localStorage
+        function initReadingMode() {
+            // On mobile, move reading mode controls into the header-right (replaces hidden fullscreen btn)
+            if (isMobile()) {
+                const rmControls = document.getElementById('readingModeControls');
+                const headerRight = document.querySelector('.header-right');
+                if (rmControls && headerRight) {
+                    headerRight.appendChild(rmControls);
+                }
+            }
+
+            if (readingMode !== 'single') {
+                // Highlight the correct option
+                document.querySelectorAll('.reading-mode-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.mode === readingMode);
+                });
+                updateDualPageDisplay();
+            }
+        }
+
+        initReadingMode();
+        // Initial preload
+        preloadAdjacentPages();
+    </script>
+</body>
+</html>

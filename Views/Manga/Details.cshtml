@@ -4,62 +4,58 @@
     ViewData["Title"] = Model.Titulo;
 }
 
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-md-4">
+<!-- Manga Details Hero (mobile: blurred bg + cover) -->
+<div class="details-hero">
+    <img src="@(Model.ImagemCapa ?? "")" class="details-hero-bg" alt="">
+    <div class="details-hero-overlay"></div>
+    <div class="details-hero-content">
+        <div class="details-hero-cover">
             @if (!string.IsNullOrEmpty(Model.ImagemCapa))
             {
-                <img src="@Model.ImagemCapa" class="img-fluid rounded shadow" alt="@Model.Titulo">
+                <img src="@Model.ImagemCapa" alt="@Model.Titulo">
             }
             else
             {
-                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 500px;">
-                    <span>Sem capa</span>
+                <div class="details-cover-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                    </svg>
                 </div>
             }
         </div>
-
-        <div class="col-md-8">
-            <h1 class="display-5">@Model.Titulo</h1>
-            <p class="lead text-muted">Por @Model.Autor</p>
-
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Descrição</h5>
-                    <p class="card-text">@Model.Descricao</p>
-                </div>
-            </div>
-
-            <div class="card mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Informações</h5>
-                    <p class="mb-1"><strong>Páginas:</strong> @Model.Paginas.Count</p>
-                    <p class="mb-0"><strong>Adicionado em:</strong> @Model.DataCriacao.ToString("dd/MM/yyyy")</p>
-                </div>
-            </div>
-
-            <div class="d-grid gap-2">
-                @if (Model.Paginas.Any())
+        <div class="details-hero-info">
+            <h1 class="details-title">@Model.Titulo</h1>
+            <p class="details-author">by @Model.Autor</p>
+            @if (!string.IsNullOrEmpty(Model.Descricao))
+            {
+                <p class="details-hero-description">@(Model.Descricao.Length > 350 ? Model.Descricao.Substring(0, 350) + "..." : Model.Descricao)</p>
+            }
+            <div class="details-actions">
+                @if (ViewBag.HasPages == true)
                 {
-                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@Model.Id" class="btn btn-primary btn-lg">
-                        Começar a Ler
+                    <a asp-controller="Manga" asp-action="Read" asp-route-id="@Model.Id" class="details-btn details-btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/>
+                        </svg>
+                        Start Reading
                     </a>
                 }
                 else
                 {
-                    <button class="btn btn-secondary btn-lg" disabled>
-                        Sem páginas disponíveis
-                    </button>
+                    <button class="details-btn details-btn-disabled" disabled>No pages available</button>
                 }
-
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     @if (ViewBag.IsFavorito == true)
                     {
                         <form method="post" asp-controller="Manga" asp-action="RemoveFavorito" asp-route-id="@Model.Id">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-danger btn-lg">
-                                Remover dos Favoritos
+                            <button type="submit" class="details-btn details-btn-fav details-btn-fav-active">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                                </svg>
+                                Favorited
                             </button>
                         </form>
                     }
@@ -67,13 +63,137 @@
                     {
                         <form method="post" asp-controller="Manga" asp-action="AddFavorito" asp-route-id="@Model.Id">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-outline-success btn-lg">
-                                Adicionar aos Favoritos
+                            <button type="submit" class="details-btn details-btn-fav">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                                    <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                                </svg>
+                                Add to Favorites
                             </button>
                         </form>
                     }
                 }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="details-btn details-btn-fav">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                        </svg>
+                        Sign in to favorite
+                    </a>
+                }
             </div>
         </div>
     </div>
+</div>
+
+<div class="page-container">
+    <!-- Stats Bar -->
+    <div class="details-stats">
+        <div class="details-stat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+            </svg>
+            <span class="details-stat-value">@ViewBag.TotalPages</span>
+            <span class="details-stat-label">Pages</span>
+        </div>
+        <div class="details-stat-divider"></div>
+        <div class="details-stat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687z"/>
+            </svg>
+            <span class="details-stat-value">@Model.Capitulos.Count</span>
+            <span class="details-stat-label">Chapters</span>
+        </div>
+        <div class="details-stat-divider"></div>
+        <div class="details-stat">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+            </svg>
+            <span class="details-stat-value">@Model.DataCriacao.ToString("MMM yyyy")</span>
+            <span class="details-stat-label">Published</span>
+        </div>
+    </div>
+
+    <!-- Description (mobile only) -->
+    @if (!string.IsNullOrEmpty(Model.Descricao))
+    {
+        <div class="details-description-section details-mobile-only">
+            <h3 class="details-section-title">Description</h3>
+            <p class="details-description">@Model.Descricao</p>
+        </div>
+    }
+
+    <!-- Chapters List -->
+    @if (Model.Capitulos.Any())
+    {
+        var pageCounts = (Dictionary<int, int>)ViewBag.PageCountsByChapter;
+        <div class="details-chapters-section">
+            <div class="details-section-header">
+                <h3 class="details-section-title">Chapters</h3>
+                <span class="details-chapter-count">@Model.Capitulos.Count total</span>
+            </div>
+            <div class="chapter-list" id="chapterList"></div>
+            <div id="chapterLoadMore" style="text-align:center;padding:16px;display:none;">
+                <button class="details-btn details-btn-primary" onclick="loadMoreChapters()" style="margin:0 auto;">Load more chapters</button>
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                var chapters = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                    Model.Capitulos.OrderBy(c => c.NumeroCapitulo).Select(c => new {
+                        numero = c.NumeroCapitulo,
+                        nome = c.NomeExibicao,
+                        data = c.DataCriacao.ToString("dd/MM/yyyy"),
+                        paginas = pageCounts.ContainsKey(c.Id) ? pageCounts[c.Id] : 0,
+                        url = Url.Action("Read", "Manga", new { id = Model.Id, capituloNumero = c.NumeroCapitulo })
+                    })
+                ));
+                var BATCH = 50;
+                var shown = 0;
+                var list = document.getElementById('chapterList');
+                var btn = document.getElementById('chapterLoadMore');
+
+                function renderBatch() {
+                    var end = Math.min(shown + BATCH, chapters.length);
+                    var fragment = document.createDocumentFragment();
+                    for (var i = shown; i < end; i++) {
+                        var c = chapters[i];
+                        var a = document.createElement('a');
+                        a.href = c.url;
+                        a.className = 'chapter-item';
+                        a.innerHTML =
+                            '<div class="chapter-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#00d9a3" viewBox="0 0 16 16"><path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811V2.828zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492V2.687zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783z"/></svg></div>' +
+                            '<div class="chapter-info"><h5 class="chapter-name">' + c.nome + '</h5>' +
+                            '<div class="chapter-meta"><small><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg> ' + c.data + '</small>' +
+                            '<small><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/><path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/></svg> ' + c.paginas + ' pages</small></div></div>' +
+                            '<span class="chapter-read-btn">Read</span>';
+                        fragment.appendChild(a);
+                    }
+                    list.appendChild(fragment);
+                    shown = end;
+                    btn.style.display = shown < chapters.length ? '' : 'none';
+                }
+
+                window.loadMoreChapters = renderBatch;
+
+                // Initial render
+                renderBatch();
+
+                // Auto-load on scroll near bottom
+                var loading = false;
+                window.addEventListener('scroll', function() {
+                    if (loading || shown >= chapters.length) return;
+                    var rect = btn.getBoundingClientRect();
+                    if (rect.top < window.innerHeight + 200) {
+                        loading = true;
+                        renderBatch();
+                        loading = false;
+                    }
+                });
+            })();
+        </script>
+    }
 </div>

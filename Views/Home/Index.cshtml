@@ -2,49 +2,244 @@
 
 @{
     ViewData["Title"] = "Home - AnyComic";
+    var banners = ViewBag.Banners as List<AnyComic.Models.Banner>;
+    var newestMangas = ViewBag.NewestMangas as List<AnyComic.Models.Manga>;
 }
 
-<div class="container">
-    <div class="text-center mb-5">
-        <h1 class="display-4">Bem-vindo ao AnyComic</h1>
-        <p class="lead">Seu portal de mangás online</p>
+<!-- Banner Carousel -->
+@if (banners != null && banners.Any())
+{
+    <div id="bannerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" style="margin-bottom: 0;">
+        <div class="carousel-indicators">
+            @for (int i = 0; i < banners.Count; i++)
+            {
+                <button type="button" data-bs-target="#bannerCarousel" data-bs-slide-to="@i" class="@(i == 0 ? "active" : "")" aria-current="@(i == 0 ? "true" : "false")" aria-label="Slide @(i + 1)"></button>
+            }
+        </div>
+        <div class="carousel-inner">
+            @for (int i = 0; i < banners.Count; i++)
+            {
+                var banner = banners[i];
+                <div class="carousel-item @(i == 0 ? "active" : "")">
+                    @if (banner.Tipo == 1 && banner.Manga != null)
+                    {
+                        <div class="banner-showcase">
+                            <img src="@banner.ImagemUrl" class="banner-showcase-bg" alt="">
+                            <div class="banner-showcase-overlay"></div>
+                            <div class="banner-showcase-content">
+                                <div class="banner-showcase-cover">
+                                    <img src="@banner.Manga.ImagemCapa" alt="@banner.Manga.Titulo">
+                                </div>
+                                <div class="banner-showcase-info">
+                                    <h2 class="banner-showcase-title">@banner.Manga.Titulo</h2>
+                                    <p class="banner-showcase-author">@banner.Manga.Autor</p>
+                                    <p class="banner-showcase-description">@(banner.Manga.Descricao.Length > 200 ? banner.Manga.Descricao.Substring(0, 200) + "..." : banner.Manga.Descricao)</p>
+                                    <a asp-controller="Manga" asp-action="Details" asp-route-id="@banner.Manga.Id" class="btn btn-primary banner-showcase-btn">
+                                        Read Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="banner-container">
+                            <img src="@banner.ImagemUrl" class="d-block w-100 banner-image" alt="@banner.Titulo">
+                            <div class="carousel-caption-custom">
+                                <h2 class="banner-title">@banner.Titulo</h2>
+                                @if (!string.IsNullOrEmpty(banner.Subtitulo))
+                                {
+                                    <p class="banner-subtitle">@banner.Subtitulo</p>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#bannerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#bannerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+}
+
+<!-- Page Container - HotComics Style -->
+<div class="page-container">
+
+    <!-- Newest Section -->
+    @if (newestMangas != null && newestMangas.Any())
+    {
+        <div class="section-header fade-in">
+            <div class="section-header-left">
+                <div class="section-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/>
+                        <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="section-title">Newest</h2>
+                    <p class="section-subtitle">Recently added manga and comics</p>
+                </div>
+            </div>
+        </div>
+        <div class="newest-row fade-in">
+            <button class="newest-arrow newest-arrow-left" onclick="scrollNewest(-1)" aria-label="Scroll left">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z"/>
+                </svg>
+            </button>
+            <div class="newest-scroll" id="newestScroll">
+                @foreach (var manga in newestMangas)
+                {
+                    <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" class="newest-card-link">
+                        <div class="newest-card">
+                            <div class="newest-card-image">
+                                @if (!string.IsNullOrEmpty(manga.ImagemCapa))
+                                {
+                                    <img src="@manga.ImagemCapa" alt="@manga.Titulo" loading="lazy">
+                                }
+                                else
+                                {
+                                    <div class="newest-card-placeholder">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                            <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                        </svg>
+                                    </div>
+                                }
+                                <span class="newest-badge">NEW</span>
+                            </div>
+                            <div class="newest-card-body">
+                                <h3 class="newest-card-title">@manga.Titulo</h3>
+                                <p class="newest-card-author">@manga.Autor</p>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+            <button class="newest-arrow newest-arrow-right" onclick="scrollNewest(1)" aria-label="Scroll right">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+        </div>
+    }
+
+    <!-- Popular Manga Section -->
+    <div class="section-header">
+        <div class="section-header-left">
+            <div class="section-icon section-icon-fire">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 16c3.314 0 6-2.686 6-6 0-4.828-3.6-9.03-5.678-10.79a.5.5 0 0 0-.644 0C5.6.97 2 5.172 2 10c0 3.314 2.686 6 6 6zM6 10c0-2 1.5-4 2-5 .5 1 2 3 2 5a2 2 0 1 1-4 0z"/>
+                </svg>
+            </div>
+            <div>
+                <h2 class="section-title">Popular Manga</h2>
+                <p class="section-subtitle">Discover the best manga and comics</p>
+            </div>
+        </div>
+        <a asp-controller="Manga" asp-action="Index" class="section-view-all">
+            View All
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+            </svg>
+        </a>
     </div>
 
     @if (Model != null && Model.Any())
     {
-        <div class="row row-cols-1 row-cols-md-3 row-cols-lg-4 g-4">
+        <!-- Manga Grid - HotComics Style -->
+        <div class="manga-grid fade-in">
             @foreach (var manga in Model)
             {
-                <div class="col">
-                    <div class="card h-100 shadow-sm manga-card">
-                        @if (!string.IsNullOrEmpty(manga.ImagemCapa))
-                        {
-                            <img src="@manga.ImagemCapa" class="card-img-top manga-cover" alt="@manga.Titulo">
-                        }
-                        else
-                        {
-                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 350px;">
-                                <span class="text-white">Sem capa</span>
-                            </div>
-                        }
-                        <div class="card-body">
-                            <h5 class="card-title">@manga.Titulo</h5>
-                            <p class="card-text text-muted"><small>Por @manga.Autor</small></p>
-                            <p class="card-text">@(manga.Descricao.Length > 100 ? manga.Descricao.Substring(0, 100) + "..." : manga.Descricao)</p>
+                <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" style="text-decoration: none; color: inherit;">
+                    <div class="manga-card">
+                        <div class="manga-card-image">
+                            @if (!string.IsNullOrEmpty(manga.ImagemCapa))
+                            {
+                                <img src="@manga.ImagemCapa" alt="@manga.Titulo" loading="lazy">
+                            }
+                            else
+                            {
+                                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #6c757d;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                                        <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                                    </svg>
+                                    <p style="margin-top: 8px; font-size: 12px;">No cover</p>
+                                </div>
+                            }
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <a asp-controller="Manga" asp-action="Details" asp-route-id="@manga.Id" class="btn btn-primary w-100">Ver Detalhes</a>
+                        <div class="manga-card-body">
+                            <h3 class="manga-card-title">@manga.Titulo</h3>
+                            <p class="manga-card-author">@manga.Autor</p>
+                            <div class="manga-card-info">
+                                <span>@manga.DataCriacao.ToString("MMM dd, yyyy")</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </a>
             }
         </div>
     }
     else
     {
-        <div class="alert alert-info text-center" role="alert">
-            <h4>Nenhum mangá disponível no momento</h4>
-            <p>Volte em breve para conferir novos mangás!</p>
+        <!-- Empty State -->
+        <div class="alert alert-info text-center" style="margin-top: 40px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" viewBox="0 0 16 16" style="margin-bottom: 15px; opacity: 0.5;">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+            </svg>
+            <h4 style="font-weight: 600; margin-bottom: 10px;">No manga available</h4>
+            <p style="margin-bottom: 0; color: #6c757d;">Check back soon for new content!</p>
         </div>
     }
 </div>
+
+@section Scripts {
+<script>
+    (function() {
+        var container = document.getElementById('newestScroll');
+        if (!container) return;
+
+        var leftArrow = document.querySelector('.newest-arrow-left');
+        var rightArrow = document.querySelector('.newest-arrow-right');
+
+        function updateArrows() {
+            var scrollLeft = container.scrollLeft;
+            var maxScroll = container.scrollWidth - container.clientWidth;
+
+            if (scrollLeft <= 5) {
+                leftArrow.style.opacity = '0';
+                leftArrow.style.pointerEvents = 'none';
+            } else {
+                leftArrow.style.opacity = '1';
+                leftArrow.style.pointerEvents = 'auto';
+            }
+
+            if (scrollLeft >= maxScroll - 5) {
+                rightArrow.style.opacity = '0';
+                rightArrow.style.pointerEvents = 'none';
+            } else {
+                rightArrow.style.opacity = '1';
+                rightArrow.style.pointerEvents = 'auto';
+            }
+        }
+
+        container.addEventListener('scroll', updateArrows);
+        window.addEventListener('resize', updateArrows);
+        updateArrows();
+
+        window.scrollNewest = function(direction) {
+            var scrollAmount = container.clientWidth * 0.7;
+            container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        };
+    })();
+</script>
+}

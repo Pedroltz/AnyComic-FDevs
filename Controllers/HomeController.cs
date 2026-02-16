@@ -19,13 +19,26 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        var mangas = await _context.Mangas.ToListAsync();
-        return View(mangas);
-    }
+        // Get newest mangas (last 10 added)
+        var newest = await _context.Mangas
+            .OrderByDescending(m => m.DataCriacao)
+            .Take(10)
+            .ToListAsync();
 
-    public IActionResult Sobre()
-    {
-        return View();
+        // Get all mangas for the view
+        var mangas = await _context.Mangas.ToListAsync();
+
+        // Get active banners ordered by display order (include Manga for showcase type)
+        var banners = await _context.Banners
+            .Include(b => b.Manga)
+            .Where(b => b.Ativo)
+            .OrderBy(b => b.Ordem)
+            .ToListAsync();
+
+        ViewBag.Banners = banners;
+        ViewBag.NewestMangas = newest;
+
+        return View(mangas);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

@@ -15,6 +15,61 @@ namespace AnyComic.Controllers
             _context = context;
         }
 
+        // GET: Manga/Index
+        public async Task<IActionResult> Index(string? searchTerm, string? autor, DateTime? dataInicio, DateTime? dataFim, string? sortBy)
+        {
+            var query = _context.Mangas.AsQueryable();
+
+            // Filtro por título
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(m => m.Titulo.Contains(searchTerm));
+            }
+
+            // Filtro por autor
+            if (!string.IsNullOrWhiteSpace(autor))
+            {
+                query = query.Where(m => m.Autor.Contains(autor));
+            }
+
+            // Filtro por data de criação (início)
+            if (dataInicio.HasValue)
+            {
+                query = query.Where(m => m.DataCriacao >= dataInicio.Value);
+            }
+
+            // Filtro por data de criação (fim)
+            if (dataFim.HasValue)
+            {
+                query = query.Where(m => m.DataCriacao <= dataFim.Value);
+            }
+
+            // Ordenação
+            query = sortBy switch
+            {
+                "titulo_asc" => query.OrderBy(m => m.Titulo),
+                "titulo_desc" => query.OrderByDescending(m => m.Titulo),
+                "autor_asc" => query.OrderBy(m => m.Autor),
+                "autor_desc" => query.OrderByDescending(m => m.Autor),
+                "data_asc" => query.OrderBy(m => m.DataCriacao),
+                "data_desc" => query.OrderByDescending(m => m.DataCriacao),
+                _ => query.OrderByDescending(m => m.DataCriacao) // Padrão: mais recentes primeiro
+            };
+
+            var mangas = await query
+                .Include(m => m.Capitulos)
+                .ToListAsync();
+
+            // Passar os filtros atuais para a view
+            ViewBag.SearchTerm = searchTerm;
+            ViewBag.Autor = autor;
+            ViewBag.DataInicio = dataInicio?.ToString("yyyy-MM-dd");
+            ViewBag.DataFim = dataFim?.ToString("yyyy-MM-dd");
+            ViewBag.SortBy = sortBy;
+
+            return View(mangas);
+        }
+
         // GET: Manga/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -24,13 +79,29 @@ namespace AnyComic.Controllers
             }
 
             var manga = await _context.Mangas
-                .Include(m => m.Paginas.OrderBy(p => p.NumeroPagina))
+                .Include(m => m.Capitulos.OrderBy(c => c.NumeroCapitulo))
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (manga == null)
             {
                 return NotFound();
             }
+
+            // Load only page counts per chapter (not full page entities)
+            var pageCountsByChapter = await _context.PaginasMangas
+                .Where(p => p.MangaId == id)
+                .GroupBy(p => p.CapituloId)
+                .Select(g => new { CapituloId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CapituloId, x => x.Count);
+
+            ViewBag.PageCountsByChapter = pageCountsByChapter;
+
+            // Total pages count for stats
+            var totalPages = pageCountsByChapter.Values.Sum();
+            ViewBag.TotalPages = totalPages;
+
+            // Check if manga has any pages (for "Start Reading" button)
+            ViewBag.HasPages = totalPages > 0;
 
             // Verificar se está nos favoritos do usuário
             if (User.Identity?.IsAuthenticated == true)
@@ -45,7 +116,7 @@ namespace AnyComic.Controllers
         }
 
         // GET: Manga/Read/5
-        public async Task<IActionResult> Read(int? id, int pagina = 1)
+        public async Task<IActionResult> Read(int? id, int? capituloNumero = null, string pagina = "1")
         {
             if (id == null)
             {
@@ -53,7 +124,8 @@ namespace AnyComic.Controllers
             }
 
             var manga = await _context.Mangas
-                .Include(m => m.Paginas.OrderBy(p => p.NumeroPagina))
+                .Include(m => m.Capitulos.OrderBy(c => c.NumeroCapitulo))
+                    .ThenInclude(c => c.Paginas.OrderBy(p => p.NumeroPagina))
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (manga == null)
@@ -61,21 +133,71 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            if (!manga.Paginas.Any())
+            if (!manga.Capitulos.Any() || !manga.Capitulos.Any(c => c.Paginas.Any()))
             {
                 return RedirectToAction(nameof(Details), new { id });
             }
 
-            var paginaAtual = manga.Paginas.FirstOrDefault(p => p.NumeroPagina == pagina);
-            if (paginaAtual == null)
+            // If no chapter specified, start from Chapter 1
+            Capitulo? capituloAtual;
+            if (capituloNumero == null)
             {
-                paginaAtual = manga.Paginas.First();
+                capituloAtual = manga.Capitulos.OrderBy(c => c.NumeroCapitulo).First();
+            }
+            else
+            {
+                capituloAtual = manga.Capitulos.FirstOrDefault(c => c.NumeroCapitulo == capituloNumero);
+                if (capituloAtual == null)
+                {
+                    capituloAtual = manga.Capitulos.OrderBy(c => c.NumeroCapitulo).First();
+                }
             }
 
-            ViewBag.TotalPaginas = manga.Paginas.Count;
+            // Get the requested page from the current chapter
+            PaginaManga? paginaAtual;
+            if (pagina.Equals("last", StringComparison.OrdinalIgnoreCase))
+            {
+                paginaAtual = capituloAtual.Paginas.OrderByDescending(p => p.NumeroPagina).First();
+            }
+            else
+            {
+                int.TryParse(pagina, out int paginaNum);
+                paginaAtual = capituloAtual.Paginas.FirstOrDefault(p => p.NumeroPagina == paginaNum);
+                if (paginaAtual == null)
+                {
+                    paginaAtual = capituloAtual.Paginas.OrderBy(p => p.NumeroPagina).First();
+                }
+            }
+
+            // Chapter-scoped navigation
+            var paginasDoCapitulo = capituloAtual.Paginas.OrderBy(p => p.NumeroPagina).ToList();
+
+            // Build page map only for the current chapter (includes image paths for client-side navigation)
+            var pageMap = paginasDoCapitulo.Select((p, index) => new
+            {
+                pagina = p.NumeroPagina,
+                index = index + 1,
+                imagem = p.CaminhoImagem
+            }).ToList();
+
+            // Determine next/previous chapters
+            var capitulosOrdenados = manga.Capitulos.OrderBy(c => c.NumeroCapitulo).ToList();
+            var capituloIndex = capitulosOrdenados.FindIndex(c => c.Id == capituloAtual.Id);
+            var proximoCapitulo = capituloIndex < capitulosOrdenados.Count - 1
+                ? capitulosOrdenados[capituloIndex + 1] : null;
+            var capituloAnterior = capituloIndex > 0
+                ? capitulosOrdenados[capituloIndex - 1] : null;
+
+            ViewBag.TotalPaginas = paginasDoCapitulo.Count;
             ViewBag.PaginaAtual = paginaAtual.NumeroPagina;
             ViewBag.MangaId = manga.Id;
             ViewBag.MangaTitulo = manga.Titulo;
+            ViewBag.CapituloAtual = capituloAtual;
+            ViewBag.TotalCapitulos = manga.Capitulos.Count;
+            ViewBag.PageMap = pageMap;
+            ViewBag.Capitulos = capitulosOrdenados;
+            ViewBag.ProximoCapitulo = proximoCapitulo;
+            ViewBag.CapituloAnterior = capituloAnterior;
 
             return View(paginaAtual);
         }

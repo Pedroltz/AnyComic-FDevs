@@ -13,8 +13,10 @@ namespace AnyComic.Data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<UsuarioAdmin> UsuariosAdmin { get; set; }
         public DbSet<Manga> Mangas { get; set; }
+        public DbSet<Capitulo> Capitulos { get; set; }
         public DbSet<PaginaManga> PaginasMangas { get; set; }
         public DbSet<Favorito> Favoritos { get; set; }
+        public DbSet<Banner> Banners { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,11 +36,25 @@ namespace AnyComic.Data
                 .HasForeignKey(f => f.MangaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // Configurar relacionamento Manga - Capitulo
+            modelBuilder.Entity<Capitulo>()
+                .HasOne(c => c.Manga)
+                .WithMany(m => m.Capitulos)
+                .HasForeignKey(c => c.MangaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Configurar relacionamento Manga - PaginaManga
             modelBuilder.Entity<PaginaManga>()
                 .HasOne(p => p.Manga)
                 .WithMany(m => m.Paginas)
                 .HasForeignKey(p => p.MangaId)
+                .OnDelete(DeleteBehavior.Restrict); // Changed to Restrict to avoid multiple cascade paths
+
+            // Configurar relacionamento Capitulo - PaginaManga
+            modelBuilder.Entity<PaginaManga>()
+                .HasOne(p => p.Capitulo)
+                .WithMany(c => c.Paginas)
+                .HasForeignKey(p => p.CapituloId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Criar índices únicos
@@ -54,6 +70,13 @@ namespace AnyComic.Data
             modelBuilder.Entity<Favorito>()
                 .HasIndex(f => new { f.UsuarioId, f.MangaId })
                 .IsUnique();
+
+            // Configurar relacionamento Banner -> Manga (opcional)
+            modelBuilder.Entity<Banner>()
+                .HasOne(b => b.Manga)
+                .WithMany()
+                .HasForeignKey(b => b.MangaId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
