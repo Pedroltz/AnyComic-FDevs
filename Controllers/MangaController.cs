@@ -78,8 +78,6 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            // Highly optimized query - only load chapters, NOT pages
-            // Pages are only needed for counts, not actual data
             var manga = await _context.Mangas
                 .Include(m => m.Capitulos.OrderBy(c => c.NumeroCapitulo))
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -89,25 +87,21 @@ namespace AnyComic.Controllers
                 return NotFound();
             }
 
-            // Load pages for chapters and manga
-            if (manga.Capitulos.Any())
-            {
-                var capituloIds = manga.Capitulos.Select(c => c.Id).ToList();
-                var paginasPorCapitulo = await _context.PaginasMangas
-                    .Where(p => capituloIds.Contains(p.CapituloId))
-                    .ToListAsync();
+            // Load only page counts per chapter (not full page entities)
+            var pageCountsByChapter = await _context.PaginasMangas
+                .Where(p => p.MangaId == id)
+                .GroupBy(p => p.CapituloId)
+                .Select(g => new { CapituloId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CapituloId, x => x.Count);
 
-                foreach (var capitulo in manga.Capitulos)
-                {
-                    capitulo.Paginas = paginasPorCapitulo
-                        .Where(p => p.CapituloId == capitulo.Id)
-                        .ToList();
-                }
-            }
+            ViewBag.PageCountsByChapter = pageCountsByChapter;
 
-            await _context.Entry(manga)
-                .Collection(m => m.Paginas)
-                .LoadAsync();
+            // Total pages count for stats
+            var totalPages = pageCountsByChapter.Values.Sum();
+            ViewBag.TotalPages = totalPages;
+
+            // Check if manga has any pages (for "Start Reading" button)
+            ViewBag.HasPages = totalPages > 0;
 
             // Verificar se está nos favoritos do usuário
             if (User.Identity?.IsAuthenticated == true)
